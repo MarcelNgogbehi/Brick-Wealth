@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx prisma *)",
+      "PowerShell([Environment]::SetEnvironmentVariable\\(\"ADMIN_EMAIL\", \"marcel@brickswealth.com\", \"User\"\\))",
+      "Bash(mkdir -p \"c:\\\\Users\\\\HP USER\\\\Desktop\\\\Brickswealth\\\\app\\\\api\\\\admin\\\\registrations\\\\[id]\\\\approve\")",
+      "Bash(mkdir -p \"c:\\\\Users\\\\HP USER\\\\Desktop\\\\Brickswealth\\\\app\\\\api\\\\admin\\\\registrations\\\\[id]\\\\decline\")",
+      "Bash(Select-String -Path \"c:\\\\Users\\\\HP USER\\\\Desktop\\\\Brickswealth\\\\node_modules\\\\.prisma\\\\client\\\\index.js\" -Pattern \"registrationStatus\")",
+      "Bash(Select-Object -First 3)",
+      "Bash(node -e ' *)",
+      "Bash(Get-Process node *)",
+      "Bash(Select-Object Id, CPU, StartTime)",
+      "Bash(Format-Table)",
+      "PowerShell(Get-Process node -ErrorAction SilentlyContinue)",
+      "PowerShell(netstat -ano)",
+      "PowerShell(Stop-Process -Id 8980 -Force -ErrorAction SilentlyContinue)",
+      "Bash(npm run *)"
+    ]
+  }
+}

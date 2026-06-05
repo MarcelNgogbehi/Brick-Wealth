@@ -1,0 +1,51 @@
+{
+  "name": "bricks-and-wealth",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint .",
+    "seed:opportunities": "node scripts/seed-showcase-opportunities.mjs",
+    "seed:opportunities:remove": "node scripts/seed-showcase-opportunities.mjs --remove"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.19.3",
+    "@react-pdf/renderer": "^4.5.1",
+    "@uploadthing/react": "^7.3.3",
+    "@upstash/ratelimit": "^2.0.8",
+    "@upstash/redis": "^1.38.0",
+    "bcrypt": "^6.0.0",
+    "bcryptjs": "^3.0.3",
+    "date-fns": "^4.1.0",
+    "framer-motion": "^12.38.0",
+    "geoip-lite": "^1.4.10",
+    "js-cookie": "^3.0.5",
+    "lucide-react": "^1.11.0",
+    "next": "^16.2.6",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-hot-toast": "^2.6.0",
+    "react-icons": "^5.6.0",
+    "react-intersection-observer": "^10.0.3",
+    "resend": "^6.12.3",
+    "stripe": "^17.7.0",
+    "uploadthing": "^7.7.4",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3",
+    "eslint": "^9",
+    "eslint-config-next": "^16.2.6",
+    "npm": "^11.14.1",
+    "postcss": "^8.5.10",
+    "prisma": "^6.19.3",
+    "tailwindcss": "^3.4.1"
+  },
+  "overrides": {
+    "effect": ">=3.20.0",
+    "ip-address": ">=10.1.1"
+  }
+}

@@ -1,0 +1,1173 @@
+// prisma/schema.prisma
+//
+// Brick & Wealth — complete database schema.
+// 29 models total:
+//   Phase 1-2:    User, AuthToken, LoginAttempt, OnboardingProgress,
+//                 KycDocument, Consent, AdminNote, AuditLog
+//   Phase 3 Msg1: Property, PropertyImage, Spv, Mortgage
+//   Phase 3 Msg2: Opportunity, OpportunityDocument
+//   Phase 3 Msg3: OpportunityView, DocumentView
+//   Phase 4 Msg1: NotificationPreference
+//   Phase 4 Msg2: Notification, Announcement, AnnouncementRead
+//   Phase 4 Msg3: PropertyUpdate, UpdateComment, UpdateReaction, UpdateCommentFlag
+//   Phase 5 Msg1: Subscription, Allocation, Holding, CapTableSnapshot, SubscriptionAuditEvent
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")          // Pooled — used by your app at runtime
+  directUrl = env("DIRECT_DATABASE_URL")   // Direct — used by Prisma for migrations
+}
+
+// ════════════════════════════════════════════════════════════════════
+// USER — the investor account (and admin accounts)
+// ════════════════════════════════════════════════════════════════════
+model User {
+  id            String      @id @default(cuid())
+  email         String      @unique
+  fullName      String
+  username      String      @unique
+  residency     String      // "UK" | "Diaspora"
+  country       String      // ISO 3166-1 alpha-2
+  passwordHash  String?     // null until email verification completes
+  emailVerified Boolean     @default(false)
+
+  // ─── Profile customization ──────────────────────────────────────
+  avatarUrl     String?     // investor-uploaded profile picture (UploadThing CDN URL)
+
+  // ─── Onboarding profile (set in /portal/verify Step 2) ──────────
+  dateOfBirth         DateTime?
+  ageConfirmed        Boolean   @default(false)
+  addressLine1        String?
+  addressLine2        String?
+  city                String?
+  region              String?   // state / county / province
+  postcode            String?
+  postcodeFormat      String?   // "UK" | "US" | "OTHER"
+  phoneNumber         String?
+  occupation          String?
+  sourceOfFunds       String?   // "salary" | "savings" | "inheritance" | "investment" | "business" | "other"
+  sourceOfFundsDetail String?   // free-text if "other"
+  estimatedNetWorth   String?   // "under_50k" | "50k_250k" | "250k_1m" | "over_1m"
+  investorType        String?   // "retail" | "sophisticated" | "hnw"
+
+  // ─── Status flags (gate the dashboard) ──────────────────────────
+  onboardingComplete   Boolean  @default(false)
+  kycComplete          Boolean  @default(false)
+  kycStatus            String   @default("not_started")
+  consentsComplete     Boolean  @default(false)
+  accountActivated     Boolean  @default(false)
+
+  // ─── Registration approval (admin-controlled) ───────────────────
+  registrationStatus String   @default("pending")
+
+  // ─── Admin-related fields ───────────────────────────────────────
+  role              String    @default("investor")
+  tags              String[]  @default([])
+  flaggedForReview  Boolean   @default(false)
+  flagReason        String?
+  lastSeenAt        DateTime?
+  suspendedAt       DateTime?
+  suspensionReason  String?
+
+  // ─── Phase 5: regulatory snapshot timestamps ─────────────────────
+  selfCertifiedAt    DateTime?
+  riskAcknowledgedAt DateTime?
+
+  // ─── Phase 7: referrals (recognition only, no payouts) ───────────
+  referralCode     String?   @unique   // this user's primary shareable code (mirror)
+  referredById     String?              // who referred THIS user (chain parent)
+  referredBy       User?     @relation("ReferralChain", fields: [referredById], references: [id])
+  referrals        User[]    @relation("ReferralChain")  // users THIS user referred
+  referredAt       DateTime?
+  referralCount    Int       @default(0)  // denormalised direct-referral recognition count
+
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  tokens                  AuthToken[]
+  kycDocuments            KycDocument[]
+  consents                Consent[]
+  onboardingProgress      OnboardingProgress?
+  adminNotes              AdminNote[]              @relation("InvestorNotes")
+  authoredNotes           AdminNote[]              @relation("AuthoredNotes")
+  auditLogs               AuditLog[]               @relation("AdminAudits")
+  notificationPreferences NotificationPreference[]
+  notifications           Notification[]
+
+  @@index([email])
+  @@index([username])
+  @@index([emailVerified])
+  @@index([kycStatus])
+  @@index([accountActivated])
+  @@index([role])
+  @@index([flaggedForReview])
+  @@index([suspendedAt])
+  @@index([registrationStatus])
+  @@index([referredById])
+  @@index([referralCode])
+}
+
+// ════════════════════════════════════════════════════════════════════
+// AUTH TOKEN — unified table for register, reset, session
+// ════════════════════════════════════════════════════════════════════
+model AuthToken {
+  id        String    @id @default(cuid())
+  userId    String
+  tokenHash String    @unique
+  type      String
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // PHASE 4 MSG 1 — optional device context (populated for new sessions)
+  deviceInfo String? @db.Text
+
+  @@index([tokenHash])
+  @@index([userId, type])
+  @@index([expiresAt])
+}
+
+// ════════════════════════════════════════════════════════════════════
+// LOGIN ATTEMPT
+// ════════════════════════════════════════════════════════════════════
+model LoginAttempt {
+  id        String   @id @default(cuid())
+  email     String
+  ip        String
+  userAgent String
+  success   Boolean
+  createdAt DateTime @default(now())
+
+  @@index([email, createdAt])
+}
+
+// ════════════════════════════════════════════════════════════════════
+// ONBOARDING PROGRESS
+// ════════════════════════════════════════════════════════════════════
+model OnboardingProgress {
+  id              String    @id @default(cuid())
+  userId          String    @unique
+  currentStep     String    @default("password")
+  passwordSetAt   DateTime?
+  profileSavedAt  DateTime?
+  kycStartedAt    DateTime?
+  kycSubmittedAt  DateTime?
+  consentsAt      DateTime?
+  completedAt     DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([currentStep])
+}
+
+// ════════════════════════════════════════════════════════════════════
+// KYC DOCUMENT
+// ════════════════════════════════════════════════════════════════════
+model KycDocument {
+  id              String    @id @default(cuid())
+  userId          String
+  documentType    String
+  fileUrl         String
+  fileName        String
+  fileSize        Int
+  mimeType        String
+  uploadedAt      DateTime  @default(now())
+  reviewStatus    String    @default("pending")
+  reviewedAt      DateTime?
+  reviewedBy      String?
+  rejectionReason String?
+
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, documentType])
+  @@index([reviewStatus])
+}
+
+// ════════════════════════════════════════════════════════════════════
+// CONSENT
+// ════════════════════════════════════════════════════════════════════
+model Consent {
+  id              String   @id @default(cuid())
+  userId          String
+  consentType     String
+  documentVersion String
+  granted         Boolean
+  grantedAt       DateTime @default(now())
+  ip              String
+  userAgent       String
+
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, consentType, documentVersion])
+  @@index([userId])
+  @@index([consentType])
+}
+
+// ════════════════════════════════════════════════════════════════════
+// ADMIN NOTE
+// ════════════════════════════════════════════════════════════════════
+model AdminNote {
+  id                 String   @id @default(cuid())
+  targetUserId       String
+  authorAdminId      String
+  content            String   @db.Text
+  visibleToInvestor  Boolean  @default(false)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  targetUser  User @relation("InvestorNotes", fields: [targetUserId], references: [id], onDelete: Cascade)
+  author      User @relation("AuthoredNotes", fields: [authorAdminId], references: [id])
+
+  @@index([targetUserId])
+  @@index([authorAdminId])
+  @@index([createdAt])
+}
+
+// ════════════════════════════════════════════════════════════════════
+// AUDIT LOG
+// ════════════════════════════════════════════════════════════════════
+model AuditLog {
+  id            String   @id @default(cuid())
+  actorAdminId  String
+  action        String
+  entityType    String
+  entityId      String
+  beforeJson    Json?
+  afterJson     Json?
+  metadata      Json?
+  ipAddress     String?
+  userAgent     String?
+  createdAt     DateTime @default(now())
+
+  actor User @relation("AdminAudits", fields: [actorAdminId], references: [id])
+
+  @@index([actorAdminId])
+  @@index([entityType, entityId])
+  @@index([action])
+  @@index([createdAt])
+}
+
+// ════════════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════════════
+//
+//                  PHASE 3 — PROPERTIES, SPVs, OPPORTUNITIES
+//
+// ════════════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════════════
+
+// ════════════════════════════════════════════════════════════════════
+// PROPERTY
+// ════════════════════════════════════════════════════════════════════
+model Property {
+  id            String   @id @default(cuid())
+
+  title         String
+  addressLine1  String
+  addressLine2  String?
+  city          String
+  region        String?
+  postcode      String
+  country       String   @default("GB")
+
+  latitude      Float?
+  longitude     Float?
+
+  propertyType  String
+  bedrooms      Int?
+  bathrooms     Int?
+  sqft          Int?
+  yearBuilt     Int?
+
+  propertyValue Decimal? @db.Decimal(14, 2)
+
+  description             String?  @db.Text
+  story                   String?  @db.Text
+  neighbourhoodHighlights String?  @db.Text
+
+  status        String   @default("draft")
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  createdById   String?
+
+  spv           Spv?
+  images        PropertyImage[]
+
+  @@index([status])
+  @@index([city])
+  @@index([country])
+  @@index([propertyType])
+  @@index([createdAt])
+}
+
+// ════════════════════════════════════════════════════════════════════
+// PROPERTY IMAGE
+// ════════════════════════════════════════════════════════════════════
+model PropertyImage {
+  id           String   @id @default(cuid())
+  propertyId   String
+  fileUrl      String
+  fileName     String?
+  fileSize     Int?
+  mimeType     String?
+  caption      String?
+  altText      String?
+  sortOrder    Int      @default(0)
+  isHero       Boolean  @default(false)
+  storageType  String   @default("uploadthing")
+  uploadedAt   DateTime @default(now())
+
+  property     Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@index([propertyId, sortOrder])
+  @@index([propertyId, isHero])
+}
+
+// ════════════════════════════════════════════════════════════════════
+// SPV
+// ════════════════════════════════════════════════════════════════════
+model Spv {
+  id                  String   @id @default(cuid())
+
+  spvName             String
+  companyNumber       String   @unique
+  jurisdiction        String   @default("UK")
+  incorporatedOn      DateTime?
+  registeredAddress   String?  @db.Text
+  purpose             String?  @db.Text
+
+  propertyId          String   @unique
+  property            Property @relation(fields: [propertyId], references: [id])
+
+  currency            String   @default("GBP")
+  targetRaiseAmount   Decimal  @db.Decimal(14, 2)
+  unitPrice           Decimal  @db.Decimal(10, 2)
+  totalUnits          Int
+  unitsAllocated      Int      @default(0)
+  minimumUnits        Int      @default(1)
+
+  // ─── Phase 5: nominal value per share ────────────────────────────
+  // For UK private limited companies, ordinary shares typically have
+  // £1.00 nominal value. Admin can override per SPV if needed.
+  nominalValue        Decimal  @default(1.00) @db.Decimal(10, 2)
+
+  openDate            DateTime?
+  closeDate           DateTime?
+
+  bankAccountReference String?
+  bankAccountName      String?
+
+  status              String   @default("draft")
+
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  createdById         String?
+
+  mortgage            Mortgage?
+  opportunity         Opportunity?
+
+  @@index([status])
+  @@index([companyNumber])
+  @@index([currency])
+  @@index([createdAt])
+  @@index([openDate, closeDate])
+}
+
+// ════════════════════════════════════════════════════════════════════
+// MORTGAGE
+// ════════════════════════════════════════════════════════════════════
+model Mortgage {
+  id                String   @id @default(cuid())
+  spvId             String   @unique
+
+  lenderName        String
+  mortgageType      String
+
+  currency          String   @default("GBP")
+  principalAmount   Decimal  @db.Decimal(14, 2)
+
+  ltvPct            Float
+  interestRate      Float
+  termMonths        Int
+  monthlyPaymentEst Decimal? @db.Decimal(12, 2)
+
+  startDate         DateTime
+  endDate           DateTime?
+
+  covenantsNotes    String?  @db.Text
+
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  spv               Spv      @relation(fields: [spvId], references: [id], onDelete: Cascade)
+}
+
+// ════════════════════════════════════════════════════════════════════
+// OPPORTUNITY
+// ════════════════════════════════════════════════════════════════════
+model Opportunity {
+  id              String   @id @default(cuid())
+
+  spvId           String   @unique
+  spv             Spv      @relation(fields: [spvId], references: [id], onDelete: Cascade)
+
+  title           String
+  subtitle        String?
+  summary         String?  @db.Text
+  fullDescription String?  @db.Text
+  riskWarning     String?  @db.Text
+
+  rentalStrategy      String?  @db.Text
+  exitStrategy        String?  @db.Text
+  walkthroughVideoUrl String?
+
+  targetYieldPct      Float?
+  termMonths          Int?
+  projectedReturnPct  Float?
+
+  requiresKyc                Boolean  @default(false)
+  eligibleInvestorTypes      String[] @default(["retail", "sophisticated", "hnw"])
+  requiresSuitabilityCheck   Boolean  @default(false)
+  suitabilityQuestions       Json?
+
+  status          String   @default("draft")
+  publishedAt     DateTime?
+  closedAt        DateTime?
+
+  openDate        DateTime?
+  closeDate       DateTime?
+
+  heroImageUrl    String?
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  createdById     String?
+
+  documents       OpportunityDocument[]
+  propertyUpdates PropertyUpdate[]
+
+  @@index([status])
+  @@index([spvId])
+  @@index([publishedAt])
+  @@index([openDate, closeDate])
+  @@index([createdAt])
+}
+
+// ════════════════════════════════════════════════════════════════════
+// OPPORTUNITY DOCUMENT
+// ════════════════════════════════════════════════════════════════════
+model OpportunityDocument {
+  id              String   @id @default(cuid())
+  opportunityId   String
+  fileUrl         String
+  fileName        String
+  fileSize        Int?
+  mimeType        String?
+  category        String
+  title           String?
+  description     String?  @db.Text
+  sortOrder       Int      @default(0)
+  isRequired      Boolean  @default(false)
+  storageType     String   @default("uploadthing")
+  uploadedAt      DateTime @default(now())
+  uploadedById    String?
+
+  opportunity     Opportunity @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+
+  @@index([opportunityId, sortOrder])
+  @@index([opportunityId, category])
+}
+
+// ════════════════════════════════════════════════════════════════════
+// OPPORTUNITY VIEW
+// ════════════════════════════════════════════════════════════════════
+model OpportunityView {
+  id              String   @id @default(cuid())
+  opportunityId   String
+  userId          String
+  ipAddress       String?
+  userAgent       String?
+  viewedAt        DateTime @default(now())
+
+  @@index([opportunityId, userId])
+  @@index([userId, viewedAt])
+  @@index([viewedAt])
+}
+
+// ════════════════════════════════════════════════════════════════════
+// DOCUMENT VIEW
+// ════════════════════════════════════════════════════════════════════
+model DocumentView {
+  id              String   @id @default(cuid())
+  documentId      String
+  opportunityId   String
+  userId          String
+  ipAddress       String?
+  userAgent       String?
+  viewedAt        DateTime @default(now())
+
+  @@index([documentId, userId])
+  @@index([userId, opportunityId])
+  @@index([viewedAt])
+}
+
+// ════════════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════════════
+//
+//                  PHASE 4 — PROFILE, NOTIFICATIONS, ANNOUNCEMENTS,
+//                            PROPERTY UPDATES
+//
+// ════════════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════════════
+
+// ════════════════════════════════════════════════════════════════════
+// NOTIFICATION PREFERENCE — Phase 4 Msg 1
+// ════════════════════════════════════════════════════════════════════
+model NotificationPreference {
+  id            String   @id @default(cuid())
+  userId        String
+  category      String
+  emailEnabled  Boolean  @default(true)
+  inAppEnabled  Boolean  @default(true)
+  updatedAt     DateTime @updatedAt
+  createdAt     DateTime @default(now())
+
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, category])
+  @@index([userId])
+}
+
+// ════════════════════════════════════════════════════════════════════
+// NOTIFICATION — Phase 4 Msg 2
+// ════════════════════════════════════════════════════════════════════
+model Notification {
+  id          String    @id @default(cuid())
+  userId      String
+  category    String    // matches NOTIFICATION_CATEGORIES.key
+  title       String    @db.Text
+  body        String?   @db.Text
+  link        String?   // URL to navigate when clicked
+  metadata    Json?     // optional structured data (e.g. opportunityId)
+  readAt      DateTime?
+  createdAt   DateTime  @default(now())
+
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, readAt])
+  @@index([userId, createdAt])
+  @@index([category])
+}
+
+// ════════════════════════════════════════════════════════════════════
+// ANNOUNCEMENT — Phase 4 Msg 2
+// ════════════════════════════════════════════════════════════════════
+model Announcement {
+  id            String   @id @default(cuid())
+  title         String
+  body          String   @db.Text
+  audience      String   @default("all")
+  isPinned      Boolean  @default(false)
+  publishedAt   DateTime?
+  expiresAt     DateTime?
+  createdById   String
+  notifiedCount Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  reads         AnnouncementRead[]
+
+  @@index([publishedAt])
+  @@index([audience])
+  @@index([createdAt])
+}
+
+// ════════════════════════════════════════════════════════════════════
+// ANNOUNCEMENT READ — Phase 4 Msg 2
+// ════════════════════════════════════════════════════════════════════
+model AnnouncementRead {
+  id              String   @id @default(cuid())
+  announcementId  String
+  userId          String
+  readAt          DateTime @default(now())
+
+  announcement    Announcement @relation(fields: [announcementId], references: [id], onDelete: Cascade)
+
+  @@unique([announcementId, userId])
+  @@index([userId])
+}
+
+// ════════════════════════════════════════════════════════════════════
+// PROPERTY UPDATE — Phase 4 Msg 3
+// ════════════════════════════════════════════════════════════════════
+model PropertyUpdate {
+  id            String   @id @default(cuid())
+  opportunityId String
+  type          String
+  title         String
+  body          String   @db.Text
+  images        String[] @default([])
+  isPinned      Boolean  @default(false)
+  publishedAt   DateTime?
+  metadata      Json?
+  notifiedCount Int      @default(0)
+  createdById   String
+  deletedAt     DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  opportunity   Opportunity      @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+  comments      UpdateComment[]
+  reactions     UpdateReaction[]
+
+  @@index([opportunityId, publishedAt])
+  @@index([opportunityId, deletedAt])
+  @@index([type])
+  @@index([createdAt])
+}
+
+// ════════════════════════════════════════════════════════════════════
+// UPDATE COMMENT — Phase 4 Msg 3
+// ════════════════════════════════════════════════════════════════════
+model UpdateComment {
+  id              String   @id @default(cuid())
+  updateId        String
+  userId          String
+  body            String   @db.Text
+  parentCommentId String?
+  deletedAt       DateTime?
+  deletedByAdmin  Boolean  @default(false)
+  deletionReason  String?
+  isPinnedByAdmin Boolean  @default(false)
+  isFlagged       Boolean  @default(false)
+  flagCount       Int      @default(0)
+  editedAt        DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  update          PropertyUpdate @relation(fields: [updateId], references: [id], onDelete: Cascade)
+
+  @@index([updateId, createdAt])
+  @@index([updateId, deletedAt])
+  @@index([userId])
+  @@index([parentCommentId])
+  @@index([isFlagged])
+}
+
+// ════════════════════════════════════════════════════════════════════
+// UPDATE REACTION — Phase 4 Msg 3
+// ════════════════════════════════════════════════════════════════════
+model UpdateReaction {
+  id        String   @id @default(cuid())
+  updateId  String
+  userId    String
+  type      String   // "heart" | "clap" | "acknowledge"
+  createdAt DateTime @default(now())
+
+  update    PropertyUpdate @relation(fields: [updateId], references: [id], onDelete: Cascade)
+
+  @@unique([updateId, userId, type])
+  @@index([updateId, type])
+  @@index([userId])
+}
+
+// ════════════════════════════════════════════════════════════════════
+// UPDATE COMMENT FLAG — Phase 4 Msg 3
+// ════════════════════════════════════════════════════════════════════
+model UpdateCommentFlag {
+  id          String   @id @default(cuid())
+  commentId   String
+  reporterId  String
+  reason      String?  @db.Text
+  createdAt   DateTime @default(now())
+
+  @@unique([commentId, reporterId])
+  @@index([commentId])
+}
+
+// ════════════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════════════
+//
+//                  PHASE 5 — SUBSCRIPTIONS & ALLOCATIONS
+//
+// ════════════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════════════
+
+// ════════════════════════════════════════════════════════════════════
+// SUBSCRIPTION — Phase 5 Msg 1
+//
+// Investor's commitment to buy units. Created on subscribe submit.
+// One Subscription may produce many Allocations (splittable).
+//
+// Status flow:
+//   SUBMITTED → UNDER_REVIEW → VERIFIED → FUNDED →
+//   PARTIALLY_ALLOCATED → FULLY_ALLOCATED
+//   Terminal: REJECTED, CANCELLED
+// ════════════════════════════════════════════════════════════════════
+model Subscription {
+  id              String   @id @default(cuid())
+  userId          String
+  opportunityId   String
+  spvId           String   // denormalised — fast cap-table queries
+
+  unitsRequested  Int
+  unitPriceAtSub  Decimal  @db.Decimal(10, 2)  // price snapshot at submit
+  totalAmount     Decimal  @db.Decimal(14, 2)  // computed: units * price
+  currency        String
+
+  status          String   @default("SUBMITTED")
+
+  selfCertifiedAtSubmit    Boolean  @default(false)
+  riskAcknowledgedAtSubmit Boolean  @default(false)
+  suitabilityAnswers       Json?
+
+  paymentMethod      String    @default("bank_transfer")
+  proofOfPaymentUrl  String?
+  proofOfPaymentName String?
+  proofUploadedAt    DateTime?
+
+  // Stripe card payment (optional rail — investor still uploads a receipt and
+  // admin still verifies; these just record that a card payment cleared).
+  stripeCheckoutSessionId String?   @unique
+  stripePaymentIntentId   String?
+  paidAt                  DateTime?
+
+  rejectionReason    String?  @db.Text
+  adminNotesInternal String?  @db.Text
+  reviewerAdminId    String?
+  reviewedAt         DateTime?
+
+  oversizedFlag      Boolean  @default(false)
+  amlRequired        Boolean  @default(false)
+
+  submittedAt        DateTime?
+  verifiedAt         DateTime?
+  fundedAt           DateTime?
+  fullyAllocatedAt   DateTime?
+  cancelledAt        DateTime?
+  rejectedAt         DateTime?
+
+  subscriptionAgreementUrl  String?
+  agreementGeneratedAt      DateTime?
+
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  allocations        Allocation[]
+  auditEvents        SubscriptionAuditEvent[]
+
+  @@index([userId])
+  @@index([opportunityId])
+  @@index([spvId])
+  @@index([status])
+  @@index([submittedAt])
+  @@index([reviewerAdminId])
+  @@index([userId, status])
+}
+
+// ════════════════════════════════════════════════════════════════════
+// ALLOCATION — Phase 5 Msg 1 (splittable — one Subscription may have many)
+// ════════════════════════════════════════════════════════════════════
+model Allocation {
+  id              String   @id @default(cuid())
+  subscriptionId  String
+  spvId           String
+  userId          String
+
+  unitsAllocated  Int
+  unitPrice       Decimal  @db.Decimal(10, 2)
+  amountReceived  Decimal  @db.Decimal(14, 2)
+
+  certificateNumber       String?  @unique  // e.g. "BW-HC-0001"
+  certificateUrl          String?
+  certificateGeneratedAt  DateTime?
+
+  // ACTIVE | PARTIALLY_TRANSFERRED | TRANSFERRED | VOIDED | REDEEMED
+  status          String   @default("ACTIVE")
+
+  // ─── Phase 6: secondary transfer lifecycle ───────────────────────
+  unitsTransferred Int      @default(0)   // running total sold away from this allocation
+  voidedAt         DateTime?
+  voidReason       String?
+  supersededById   String?                // new allocation that replaced this one (on reissue)
+
+  confirmedById   String
+  confirmedAt     DateTime @default(now())
+  notes           String?  @db.Text
+
+  subscription    Subscription @relation(fields: [subscriptionId], references: [id])
+
+  @@index([subscriptionId])
+  @@index([spvId])
+  @@index([userId])
+  @@index([userId, spvId])
+  @@index([certificateNumber])
+  @@index([status])
+}
+
+// ════════════════════════════════════════════════════════════════════
+// HOLDING — Phase 5 Msg 1 (denormalised aggregate)
+// ════════════════════════════════════════════════════════════════════
+model Holding {
+  id              String   @id @default(cuid())
+  userId          String
+  spvId           String
+  opportunityId   String
+
+  totalUnits      Int
+  totalInvested   Decimal  @db.Decimal(14, 2)
+  currency        String
+  ownershipPct    Float    // totalUnits / spv.totalUnits
+
+  firstInvestedAt DateTime
+  lastUpdatedAt   DateTime @default(now())
+
+  @@unique([userId, spvId])
+  @@index([userId])
+  @@index([spvId])
+}
+
+// ════════════════════════════════════════════════════════════════════
+// CAP TABLE SNAPSHOT — Phase 5 Msg 1
+// ════════════════════════════════════════════════════════════════════
+model CapTableSnapshot {
+  id                  String   @id @default(cuid())
+  spvId               String
+  snapshotDate        DateTime @default(now())
+
+  totalInvestors      Int
+  totalUnitsAllocated Int
+  totalRaised         Decimal  @db.Decimal(14, 2)
+  currency            String
+
+  exportedByAdminId   String
+  exportFileUrl       String?   // CSV link
+  holdingsJson        Json      // full snapshot of all holdings at this moment
+
+  @@index([spvId, snapshotDate])
+  @@index([exportedByAdminId])
+}
+
+// ════════════════════════════════════════════════════════════════════
+// SUBSCRIPTION AUDIT EVENT — Phase 5 Msg 1
+// ════════════════════════════════════════════════════════════════════
+model SubscriptionAuditEvent {
+  id                String   @id @default(cuid())
+  subscriptionId    String
+  eventType         String   // STATUS_CHANGED | UNITS_ADJUSTED | NOTE_ADDED | PROOF_UPLOADED | etc.
+  beforeState       Json?
+  afterState        Json?
+  actorId           String   // user id (investor or admin)
+  actorRole         String   // "investor" | "admin" | "super_admin"
+  visibleToInvestor Boolean  @default(true)
+  notes             String?  @db.Text
+  createdAt         DateTime @default(now())
+
+  subscription      Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+
+  @@index([subscriptionId, createdAt])
+  @@index([actorId])
+  @@index([eventType])
+}
+
+
+// ════════════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════════════
+//
+//                  PHASE 6 — SECONDARY SHARE FLOWS
+//
+// ════════════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════════════
+//
+// Buy More reuses the Subscription/Allocation pipeline (no new models).
+// Sell Shares needs these two models + the Allocation extension above.
+
+// ════════════════════════════════════════════════════════════════════
+// SHARE SALE REQUEST — Phase 6 Msg 1 (schema) / Msg 2 (logic)
+//
+// An investor's request to sell some/all units in one SPV back to the
+// company (or an admin-designated buyer). The platform never holds funds —
+// settlement happens off-platform; admin records the outcome here.
+// ════════════════════════════════════════════════════════════════════
+model ShareSaleRequest {
+  id              String    @id @default(cuid())
+
+  userId          String
+  spvId           String
+  opportunityId   String
+
+  unitsOffered        Int
+  indicativeUnitPrice Decimal @db.Decimal(12, 2)
+  indicativeAmount    Decimal @db.Decimal(14, 2)
+  currency        String    @default("GBP")
+
+  investorNote    String?   @db.Text
+
+  // REQUESTED | UNDER_REVIEW | APPROVED | SETTLED | DECLINED | CANCELLED
+  status          String    @default("REQUESTED")
+
+  reviewerAdminId String?
+  reviewedAt      DateTime?
+  adminNote       String?   @db.Text
+  declineReason   String?   @db.Text
+
+  // Settlement record (filled when SETTLED)
+  buyerType        String?   // "company_buyback" | "named_investor" | "external"
+  buyerUserId      String?
+  buyerName        String?
+  settledUnits     Int?
+  settledUnitPrice Decimal?  @db.Decimal(12, 2)
+  settledAmount    Decimal?  @db.Decimal(14, 2)
+  settledAt        DateTime?
+
+  titleTransferId String?
+
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([userId])
+  @@index([spvId])
+  @@index([status])
+  @@index([opportunityId])
+}
+
+// ════════════════════════════════════════════════════════════════════
+// TITLE TRANSFER — Phase 6 Msg 1 (schema) / Msg 2 (logic)
+//
+// Immutable record of units moving from one holder to another (or to the
+// company). Created when a ShareSaleRequest is SETTLED. Audit backbone for
+// the cap table changing hands.
+// ════════════════════════════════════════════════════════════════════
+model TitleTransfer {
+  id                String   @id @default(cuid())
+
+  spvId             String
+  opportunityId     String
+
+  fromUserId        String
+  unitsTransferred  Int
+  unitPrice         Decimal  @db.Decimal(12, 2)
+  amount            Decimal  @db.Decimal(14, 2)
+  currency          String   @default("GBP")
+
+  toType            String   // "company_buyback" | "named_investor" | "external"
+  toUserId          String?
+  toName            String?
+
+  voidedCertificateNumbers String[] @default([])
+  newCertificateNumber     String?
+
+  shareSaleRequestId String?
+  recordedByAdminId  String
+  notes             String?  @db.Text
+
+  createdAt         DateTime @default(now())
+
+  @@index([spvId])
+  @@index([fromUserId])
+  @@index([toUserId])
+  @@index([opportunityId])
+}
+
+
+// ════════════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════════════
+//
+//                  PHASE 7 — REFERRALS + INVITE-ONLY RETROFIT
+//
+// ════════════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════════════
+//
+// Soft invite-only + referral attribution, recognition only (no payouts).
+// User gains a self-relation ("ReferralChain") forming the A→B→C network.
+
+// ─── ReferralCode — an investor's (or admin's) shareable invite ──────
+model ReferralCode {
+  id            String    @id @default(cuid())
+
+  code          String    @unique
+  ownerUserId   String
+  createdByAdmin Boolean  @default(false)
+
+  maxUses       Int       @default(5)
+  useCount      Int       @default(0)
+  isActive      Boolean   @default(true)
+  expiresAt     DateTime?
+
+  // Recognition-only reward scaffold (ships OFF; no payouts)
+  rewardEnabled Boolean   @default(false)
+  rewardNote    String?
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  referrals     Referral[]
+
+  @@index([ownerUserId])
+  @@index([code])
+  @@index([isActive])
+}
+
+// ─── Referral — one immutable referrer→referee edge ─────────────────
+model Referral {
+  id              String    @id @default(cuid())
+
+  referralCodeId  String
+  referrerUserId  String
+  refereeUserId   String    @unique
+
+  // PENDING_APPROVAL | APPROVED | ACTIVATED | DECLINED
+  status          String    @default("PENDING_APPROVAL")
+
+  rewardNote      String?
+
+  registeredAt    DateTime  @default(now())
+  approvedAt      DateTime?
+  activatedAt     DateTime?
+
+  referralCode    ReferralCode @relation(fields: [referralCodeId], references: [id])
+
+  @@index([referrerUserId])
+  @@index([referralCodeId])
+  @@index([status])
+}
+// ════════════════════════════════════════════════════════════════════
+// PHASE 8 — DISTRIBUTIONS + TAX SUMMARIES (schema additions)
+// Merge into prisma/schema.prisma (append at end)
+// ════════════════════════════════════════════════════════════════════
+//
+// Design:
+//   Admin records a distribution against an SPV — total amount, record
+//   date, payment date, optional bank reference. The system snapshots
+//   every holder of that SPV at the record date into per-investor
+//   DistributionAllocation rows, computing each investor's pro-rata share.
+//
+//   Annual statements aggregate DistributionAllocation rows by tax year
+//   (UK SA 6 Apr–5 Apr OR calendar 1 Jan–31 Dec) per investor.
+//
+//   MVP: record-and-report. No automated payout integration; that's
+//   Phase 9+. Status field reserved (PAID flag exists) so payment events
+//   can be recorded later without schema change.
+//
+//   Compliance: this is *reporting*, not tax advice. Disclaimers belong
+//   in the PDF + UI, not the data layer.
+// ────────────────────────────────────────────────────────────────────
+
+// ─── Distribution — the SPV-level dividend event ─────────────────────
+// One row = one declared dividend payment from one SPV.
+
+model Distribution {
+  id                  String    @id @default(cuid())
+
+  spvId               String                          // the SPV declaring the dividend
+  opportunityId       String                          // denormalised for fast investor queries
+
+  // Declaration
+  declarationLabel    String                          // e.g. "Q4 2025 Dividend", "Rental Distribution Jan-Mar"
+  description         String?   @db.Text              // optional narrative for investors
+
+  // Money
+  totalAmount         Decimal   @db.Decimal(14, 2)    // total declared £ for the SPV
+  currency            String    @default("GBP")
+  amountPerUnit       Decimal   @db.Decimal(12, 6)    // computed: totalAmount / unitsAllocated at record date
+                                                      // 6dp precision — pence per unit matters for pro-rata
+
+  // Dates — critical for tax reporting
+  recordDate          DateTime                        // snapshot date — who holds what counts
+  paymentDate         DateTime                        // when paid out (or scheduled to be)
+  taxYearUk           String                          // "2025/26" — cached for fast tax queries
+  taxYearCalendar     String                          // "2025" — cached for fast tax queries
+
+  // Withholding (optional — for non-UK investors, basic rate, etc.)
+  withholdingPct      Float?                          // platform-wide pct OR null (per-allocation override possible)
+  withholdingNote     String?   @db.Text
+
+  // Status lifecycle
+  // DRAFT       — admin building the record, not yet attributed
+  // RECORDED    — attributed to holders, locked in (allocations created)
+  // PAID        — payment confirmed (Phase 9+ flips this)
+  // CANCELLED   — withdrawn before payment
+  status              String    @default("DRAFT")
+
+  // Audit / reference
+  bankReference       String?                         // admin's record of the bank transfer batch (optional)
+  recordedByAdminId   String
+  recordedAt          DateTime?                       // when status moved DRAFT → RECORDED
+  paidAt              DateTime?                       // when status moved → PAID (Phase 9+)
+  cancelledAt         DateTime?
+  cancellationReason  String?   @db.Text
+
+  // Snapshot stats (for fast read; recomputed when RECORDED)
+  holdersAtRecord     Int       @default(0)           // number of holders snapshotted
+  totalUnitsAtRecord  Int       @default(0)           // sum of holder units at record date
+
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  allocations         DistributionAllocation[]
+
+  @@index([spvId])
+  @@index([opportunityId])
+  @@index([status])
+  @@index([recordDate])
+  @@index([paymentDate])
+  @@index([taxYearUk])
+  @@index([taxYearCalendar])
+}
+
+// ─── DistributionAllocation — one per holder per distribution ───────
+// The immutable, tax-relevant record: who got how much, when.
+
+model DistributionAllocation {
+  id                  String    @id @default(cuid())
+
+  distributionId      String
+  userId              String                          // the investor
+  spvId               String                          // denormalised
+  opportunityId       String                          // denormalised
+  holdingId           String?                         // pointer to the holding at time of allocation (nullable — holding may change later)
+
+  // Position at record date (immutable)
+  unitsHeld           Int                             // units this investor held at record date
+  ownershipPctAtRecord Float                          // their pct of SPV at record date
+
+  // Money
+  grossAmount         Decimal   @db.Decimal(14, 2)    // gross: unitsHeld × amountPerUnit (rounded to 2dp)
+  withholdingAmount   Decimal   @db.Decimal(14, 2) @default(0)   // tax withheld (may be 0)
+  netAmount           Decimal   @db.Decimal(14, 2)    // gross − withholding
+  currency            String    @default("GBP")
+
+  // Tax year (denormalised from parent for fast investor queries)
+  taxYearUk           String
+  taxYearCalendar     String
+  paymentDate         DateTime                        // mirrors parent — for tax year sorting
+
+  // Status — mirrors parent in MVP; allocations could individually be
+  // marked PAID in Phase 9+ if payments stagger across investors.
+  status              String    @default("RECORDED")
+
+  // Payment trace (Phase 9+ fills these)
+  paidAt              DateTime?
+  paymentReference    String?                         // bank ref for this specific investor's payment
+
+  notes               String?   @db.Text
+
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  distribution        Distribution @relation(fields: [distributionId], references: [id], onDelete: Cascade)
+
+  @@unique([distributionId, userId])                  // one allocation per investor per distribution
+  @@index([userId])
+  @@index([spvId])
+  @@index([opportunityId])
+  @@index([userId, taxYearUk])
+  @@index([userId, taxYearCalendar])
+  @@index([status])
+}

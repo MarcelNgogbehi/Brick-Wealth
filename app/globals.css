@@ -1,0 +1,355 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+    scroll-behavior: smooth;
+}
+
+@layer base {
+  html {
+    font-family: var(--font-montserrat), "Montserrat", ui-sans-serif, system-ui, sans-serif;
+  }
+  body {
+    font-family: var(--font-montserrat), "Montserrat", ui-sans-serif, system-ui, sans-serif;
+  }
+  button, input, textarea, select, a {
+    font-family: inherit;
+  }
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+}
+
+::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hero responsiveness tweaks */
+.hero-section {
+  height: 100svh;
+  min-height: clamp(520px, 72vh, 900px);
+}
+
+.hero-headline {
+  font-size: clamp(40px, 7.2vw, 100px);
+  line-height: 0.92;
+}
+
+/* Reduce headline size on large and extra-large screens for improved balance */
+@media (min-width: 1280px) {
+  .hero-headline {
+    font-size: clamp(44px, 6.2vw, 88px);
+  }
+}
+
+@media (min-width: 1600px) {
+  .hero-headline {
+    font-size: 72px;
+  }
+}
+
+/* Make hero copy and CTAs flow better on narrow screens */
+@media (max-width: 640px) {
+  .hero-section .hero-headline {
+    font-size: clamp(30px, 9.5vw, 48px);
+  }
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   SITE-WIDE POLISH (marketing / public pages)
+   The two-font system (Cormorant serif display + Montserrat sans body)
+   is set per-element inline. These base rules refine the rendering of
+   that pairing and add the accessibility + interaction niceties the
+   dashboard already has. The dashboard's own `.dashboard-root` rules
+   have higher specificity, so they keep winning inside the dashboard.
+   ════════════════════════════════════════════════════════════════════ */
+
+/* Crisp text rendering + balanced display headings everywhere */
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* Cormorant is a high-contrast display serif — it reads best with the
+   slightly tighter tracking and balanced wrapping of editorial type. */
+h1, h2, h3 {
+  text-wrap: balance;
+}
+
+/* Long paragraphs avoid orphan words on the last line */
+p {
+  text-wrap: pretty;
+}
+
+/* Brand-gold text selection instead of the default browser blue */
+::selection {
+  background: rgba(201, 164, 74, 0.28);
+  color: #0b1220;
+}
+
+/* Smooth, consistent feedback on interactive elements. Element-level
+   selectors keep specificity low so any Tailwind transition utility on
+   the element still wins — this only fills the gaps. */
+a, button, [role="button"], input, select, textarea {
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease,
+    box-shadow 0.2s ease,
+    opacity 0.2s ease,
+    transform 0.15s ease;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
+/* Accessible keyboard focus — a visible gold ring for keyboard users
+   only, never the stray outline on mouse click. */
+a:focus-visible,
+button:focus-visible,
+[role="button"]:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid rgba(201, 164, 74, 0.9);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Media never overflows its container on small screens */
+img, video {
+  max-width: 100%;
+}
+
+/* Respect users who prefer reduced motion across the whole site */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   INVESTOR DASHBOARD POLISH
+   Scoped to .dashboard-root (set on DashboardShell) so the marketing
+   site is untouched. Uniformly elevates typography, interactions,
+   focus states, scrollbars and motion across every dashboard page.
+   ════════════════════════════════════════════════════════════════════ */
+
+/* Crisper text rendering + sensible defaults across the whole dashboard */
+.dashboard-root {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* ────────────────────────────────────────────────────────────────────
+   ONE TYPEFACE INSIDE THE APP
+   Every investor + admin dashboard surface renders in Montserrat — this
+   overrides any inline serif (Cormorant) display styles. Scoped to the
+   dashboard/admin roots so the public marketing site keeps its own type.
+   ──────────────────────────────────────────────────────────────────── */
+.dashboard-root,
+.dashboard-root *,
+.dashboard-root *::before,
+.dashboard-root *::after,
+.admin-root,
+.admin-root *,
+.admin-root *::before,
+.admin-root *::after {
+  font-family: var(--font-montserrat), -apple-system, BlinkMacSystemFont,
+    "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
+}
+
+/* Financial figures align in neat columns (no jitter as digits change) */
+.dashboard-root .tabular,
+.dashboard-root [data-numeric] {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+
+/* Headings: tighten serif display type for an editorial, premium feel */
+.dashboard-root h1,
+.dashboard-root h2,
+.dashboard-root h3 {
+  letter-spacing: -0.012em;
+}
+
+/* Brand text-selection colour instead of the default browser blue */
+.dashboard-root ::selection {
+  background: rgba(201, 164, 74, 0.28);
+  color: #060e1c;
+}
+
+/* Consistent, smooth feedback on every interactive element.
+   Only animates cheap, composited properties so it stays 60fps. */
+.dashboard-root a,
+.dashboard-root button,
+.dashboard-root [role="button"],
+.dashboard-root input,
+.dashboard-root select,
+.dashboard-root textarea {
+  transition:
+    background-color 0.18s ease,
+    border-color 0.18s ease,
+    color 0.18s ease,
+    box-shadow 0.18s ease,
+    transform 0.12s ease,
+    opacity 0.18s ease;
+}
+
+/* Tactile press feedback on real buttons/links acting as buttons */
+.dashboard-root button:not(:disabled):active,
+.dashboard-root a:active,
+.dashboard-root [role="button"]:active {
+  transform: translateY(0.5px) scale(0.992);
+}
+
+.dashboard-root button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+/* Accessible keyboard focus — visible ring for keyboard users only,
+   never the stray outline on mouse click. */
+.dashboard-root a:focus-visible,
+.dashboard-root button:focus-visible,
+.dashboard-root [role="button"]:focus-visible,
+.dashboard-root input:focus-visible,
+.dashboard-root select:focus-visible,
+.dashboard-root textarea:focus-visible,
+.dashboard-root [tabindex]:focus-visible {
+  outline: 2px solid rgba(201, 164, 74, 0.9);
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+.dashboard-root :focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Refined slim scrollbars inside the dashboard (the global rule hides
+   them entirely, which feels lost on long data views). */
+.dashboard-root *::-webkit-scrollbar {
+  display: block;
+  width: 10px;
+  height: 10px;
+}
+.dashboard-root *::-webkit-scrollbar-track {
+  background: transparent;
+}
+.dashboard-root *::-webkit-scrollbar-thumb {
+  background: rgba(6, 14, 28, 0.16);
+  border-radius: 9999px;
+  border: 3px solid transparent;
+  background-clip: content-box;
+}
+.dashboard-root *::-webkit-scrollbar-thumb:hover {
+  background: rgba(6, 14, 28, 0.30);
+  background-clip: content-box;
+}
+.dashboard-root * {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(6, 14, 28, 0.22) transparent;
+}
+
+/* Images never overflow their container on small screens */
+.dashboard-root img {
+  max-width: 100%;
+}
+
+/* Respect users who ask for less motion — kills entrance animations,
+   transitions and smooth scroll for them. */
+@media (prefers-reduced-motion: reduce) {
+  .dashboard-root *,
+  .dashboard-root *::before,
+  .dashboard-root *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+/* Horizontal scroll without a visible scrollbar (header quick-actions row) */
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   Admin form kit — premium inputs for create/edit forms.
+   Scope a form with className="admin-form" and all its controls
+   inherit refined borders, gold focus rings, and a custom select chevron.
+   (Base styling lives here so CSS :focus can win — inline styles can't.)
+   ════════════════════════════════════════════════════════════════ */
+.admin-form input:not([type="checkbox"]):not([type="radio"]),
+.admin-form select,
+.admin-form textarea {
+  width: 100%;
+  font-size: 13.5px;
+  color: #0B1220;
+  font-family: inherit;
+  background-color: #FFFFFF;
+  border: 1px solid #E4E4E7;
+  border-radius: 10px;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+}
+.admin-form input:not([type="checkbox"]):not([type="radio"]),
+.admin-form select {
+  height: 44px;
+  padding: 0 14px;
+}
+.admin-form textarea {
+  padding: 12px 14px;
+  line-height: 1.6;
+  resize: vertical;
+  min-height: 92px;
+}
+.admin-form input:not([type="checkbox"]):not([type="radio"]):hover:not(:focus),
+.admin-form select:hover:not(:focus),
+.admin-form textarea:hover:not(:focus) {
+  border-color: #D4D4D8;
+}
+.admin-form input:not([type="checkbox"]):not([type="radio"]):focus,
+.admin-form select:focus,
+.admin-form textarea:focus {
+  border-color: #C9A24A;
+  box-shadow: 0 0 0 3px rgba(201, 162, 74, 0.16);
+}
+.admin-form input::placeholder,
+.admin-form textarea::placeholder {
+  color: #9AA0AD;
+}
+.admin-form select {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  cursor: pointer;
+  padding-right: 40px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%238A93A6' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+}
+.admin-form input:disabled,
+.admin-form select:disabled,
+.admin-form textarea:disabled {
+  background-color: #F4F4F5;
+  color: #8A93A6;
+  cursor: not-allowed;
+}
