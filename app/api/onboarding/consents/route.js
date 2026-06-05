@@ -50,8 +50,12 @@ export async function POST(request) {
   const user = await getCurrentUser();
   if (!user) return errorResponse("Authentication required", 401);
 
-  if (!user.kycComplete) {
-    return errorResponse("Please complete KYC before consenting", 400);
+  // NOTE: KYC is intentionally NOT required here. Investors may defer their
+  // identity-document upload and still activate their account — they simply
+  // cannot subscribe until KYC is approved (enforced in
+  // checkSubscriptionEligibility). Profile completion is still required.
+  if (!user.onboardingComplete) {
+    return errorResponse("Please complete your profile before consenting", 400);
   }
 
   let raw;

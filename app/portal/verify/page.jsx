@@ -636,7 +636,7 @@ const KYC_DOCUMENTS = [
   },
 ];
 
-function StepKyc({ kycDocuments, onComplete, onBack }) {
+function StepKyc({ kycDocuments, onComplete, onSkip, onBack }) {
   const [uploaded, setUploaded] = useState(() => {
     // Pre-fill from existing uploads
     const map = {};
@@ -652,9 +652,22 @@ function StepKyc({ kycDocuments, onComplete, onBack }) {
   const [uploading, setUploading] = useState({});
   const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
+  const [skipping, setSkipping] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
 
   const allUploaded = KYC_DOCUMENTS.every((d) => uploaded[d.type]);
+  const anyUploaded = KYC_DOCUMENTS.some((d) => uploaded[d.type]);
+
+  async function handleSkip() {
+    setSkipping(true);
+    setErrorMsg("");
+    try {
+      await onSkip?.();
+    } catch {
+      setErrorMsg("Network error. Please try again.");
+      setSkipping(false);
+    }
+  }
 
   async function handleUpload(doc, file) {
     if (!file) return;
@@ -759,14 +772,36 @@ function StepKyc({ kycDocuments, onComplete, onBack }) {
       </div>
 
       <div className="mt-4 flex flex-col gap-3">
-        <PrimaryButton type="button" loading={submitting} disabled={!allUploaded} onClick={handleSubmit}>
+        <PrimaryButton type="button" loading={submitting} disabled={!allUploaded || skipping} onClick={handleSubmit}>
           Submit for Review <ArrowRight size={12} />
         </PrimaryButton>
+
+        {/* ─── Defer KYC ───────────────────────────────────────────────
+            Investors may finish onboarding now and verify later. Until
+            their documents are submitted and approved, subscriptions stay
+            locked — so this never weakens compliance. */}
+        {onSkip && (
+          <button type="button" onClick={handleSkip} disabled={submitting || skipping}
+            className="w-full h-11 flex items-center justify-center gap-2 text-[11px] font-bold tracking-[0.14em] uppercase transition-all disabled:opacity-50"
+            style={{ background: "transparent", color: GOLD_LIGHT, border: `1px solid ${GOLD_BORD}`, borderRadius: "1px", cursor: submitting || skipping ? "not-allowed" : "pointer", fontFamily: "inherit" }}
+            onMouseEnter={(e) => { if (!submitting && !skipping) e.currentTarget.style.background = GOLD_DIM; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}>
+            {skipping ? <Loader2 size={14} className="animate-spin" /> : <><Clock size={12} /> {anyUploaded ? "Finish later — skip for now" : "Skip for now — verify later"}</>}
+          </button>
+        )}
+
+        {onSkip && (
+          <p className="text-[10.5px] leading-relaxed text-center px-2" style={{ color: "rgba(255,255,255,0.4)" }}>
+            You can explore your dashboard right away. You&apos;ll need to upload and
+            pass verification before you can subscribe to an opportunity.
+          </p>
+        )}
+
         {onBack && (
-          <button type="button" onClick={onBack}
-            className="w-full h-11 flex items-center justify-center gap-2 text-[11px] font-bold tracking-[0.14em] uppercase transition-all"
-            style={{ background: "transparent", color: "rgba(255,255,255,0.5)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "1px", cursor: "pointer", fontFamily: "inherit" }}
-            onMouseEnter={(e) => { e.currentTarget.style.color = "rgba(255,255,255,0.8)"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.25)"; }}
+          <button type="button" onClick={onBack} disabled={submitting || skipping}
+            className="w-full h-11 flex items-center justify-center gap-2 text-[11px] font-bold tracking-[0.14em] uppercase transition-all disabled:opacity-50"
+            style={{ background: "transparent", color: "rgba(255,255,255,0.5)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "1px", cursor: submitting || skipping ? "not-allowed" : "pointer", fontFamily: "inherit" }}
+            onMouseEnter={(e) => { if (!submitting && !skipping) { e.currentTarget.style.color = "rgba(255,255,255,0.8)"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.25)"; } }}
             onMouseLeave={(e) => { e.currentTarget.style.color = "rgba(255,255,255,0.5)"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)"; }}>
             <ArrowLeft size={11} /> Back to Details
           </button>
@@ -1119,6 +1154,7 @@ function VerifyContent() {
   const [user, setUser] = useState(null);
   const [kycDocs, setKycDocs] = useState([]);
   const [consents, setConsents] = useState([]);
+  const [kycDeferred, setKycDeferred] = useState(false);
 
   // ─── Bootstrap: figure out where we are ─────────────────────────
   const refreshStatus = useCallback(async () => {
@@ -1182,7 +1218,36 @@ function VerifyContent() {
   }
 
   async function handleKycComplete() {
-    await refreshStatus();
+    setKycDeferred(false);
+    const status = await refreshStatus();
+    // If consents are already on file (the investor deferred KYC during
+    // onboarding and has now come back just to upload), there's nothing left
+    // to do — drop them straight into the dashboard.
+    if (status?.user?.consentsComplete) {
+      window.location.href = "/dashboard";
+      return;
+    }
+    setState("step-consents");
+  }
+
+  // Defer the document upload: record the skip server-side, then continue.
+  async function handleKycSkip() {
+    const res = await fetch("/api/onboarding/kyc", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "X-CSRF-Token": getCsrfToken() },
+      credentials: "same-origin",
+      body: JSON.stringify({ skip: true }),
+    });
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      throw new Error(data?.message || "Failed to skip verification");
+    }
+    setKycDeferred(true);
+    const status = await refreshStatus();
+    if (status?.user?.consentsComplete) {
+      window.location.href = "/dashboard";
+      return;
+    }
     setState("step-consents");
   }
 
@@ -1265,6 +1330,7 @@ function VerifyContent() {
                   <StepKyc
                     kycDocuments={kycDocs}
                     onComplete={handleKycComplete}
+                    onSkip={handleKycSkip}
                     onBack={handleBackToProfile}
                   />
                 )}
@@ -1281,7 +1347,7 @@ function VerifyContent() {
         )}
 
         {/* Done */}
-        {state === "done" && <DonePanel />}
+        {state === "done" && <DonePanel kycDeferred={kycDeferred} />}
       </div>
     </main>
   );
@@ -1408,7 +1474,7 @@ function ExpiredPanel() {
   );
 }
 
-function DonePanel() {
+function DonePanel({ kycDeferred }) {
   return (
     <motion.div initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }}
       className="flex flex-col items-center text-center gap-6 py-16 px-6"
@@ -1422,9 +1488,17 @@ function DonePanel() {
         <h2 className="leading-tight mb-3" style={{ fontFamily: "var(--font-cormorant), serif", fontWeight: 500, fontSize: "36px", color: WHITE }}>
           Welcome to <em style={{ color: GOLD_LIGHT, fontWeight: 400 }}>Bricks &amp; Wealth.</em>
         </h2>
-        <p className="text-[13.5px] leading-relaxed" style={{ color: "rgba(255,255,255,0.7)" }}>
-          Your KYC documents are under review. You can access your dashboard now while we verify them — typically within 24–72 hours.
-        </p>
+        {kycDeferred ? (
+          <p className="text-[13.5px] leading-relaxed" style={{ color: "rgba(255,255,255,0.7)" }}>
+            Your account is live — explore your dashboard and browse opportunities now.
+            When you&apos;re ready to invest, finish identity verification from the
+            dashboard to unlock subscriptions.
+          </p>
+        ) : (
+          <p className="text-[13.5px] leading-relaxed" style={{ color: "rgba(255,255,255,0.7)" }}>
+            Your KYC documents are under review. You can access your dashboard now while we verify them — typically within 24–72 hours.
+          </p>
+        )}
         <Loader2 size={20} className="animate-spin mx-auto mt-5" style={{ color: GOLD_LIGHT }} />
       </div>
     </motion.div>

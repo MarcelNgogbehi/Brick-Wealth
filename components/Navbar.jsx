@@ -231,6 +231,34 @@ function flagUrl(cc) {
   return `https://flagcdn.com/40x30/${code}.png`;
 }
 
+// ─── Auth session (logged-in state for the navbar) ────────────────────────────
+// Swaps the "Login / Register" CTA for a "Dashboard" link once the visitor has
+// an active session. Re-checked on every route change so it updates right after
+// login/logout. Admins are routed to the admin console instead.
+function useAuthSession() {
+  const pathname = usePathname();
+  const [session, setSession] = useState(null); // null = still loading
+
+  useEffect(() => {
+    let dead = false;
+    fetch("/api/auth/session", { credentials: "same-origin", cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => { if (!dead) setSession(d || { authenticated: false }); })
+      .catch(() => { if (!dead) setSession({ authenticated: false }); });
+    return () => { dead = true; };
+  }, [pathname]);
+
+  const authenticated = !!session?.authenticated;
+  const role = session?.user?.role;
+  const isAdmin = role === "admin" || role === "super_admin";
+  return {
+    authenticated,
+    isAdmin,
+    dashboardHref: isAdmin ? "/admin" : "/dashboard",
+    dashboardLabel: isAdmin ? "Admin Console" : "Investor Dashboard",
+  };
+}
+
 // ─── Smart anchor click — smooth scroll if same page, normal nav if different ─
 function useSmartAnchorClick() {
   const pathname = usePathname();
@@ -492,7 +520,7 @@ function NavItem({ item, pathname, scrolled }) {
 }
 
 // ─── Mobile Menu ──────────────────────────────────────────────────────────────
-function MobileMenu({ isOpen, onClose, pathname }) {
+function MobileMenu({ isOpen, onClose, pathname, authenticated, dashboardHref, dashboardLabel }) {
   const [expanded, setExpanded] = useState(null);
   const menuRef = useRef(null);
   const handleAnchor = useSmartAnchorClick();
@@ -637,12 +665,12 @@ function MobileMenu({ isOpen, onClose, pathname }) {
                 Browse
               </Link>
               <Link
-                href="/portal"
+                href={authenticated ? dashboardHref : "/portal"}
                 onClick={onClose}
                 className="flex-1 flex items-center justify-center gap-1.5 text-[12px] font-extrabold py-2.5 rounded-sm tracking-[0.08em] uppercase transition-colors"
                 style={{ backgroundColor: GOLD, color: NAVY_900 }}
               >
-                Login / Register
+                {authenticated ? "Dashboard" : "Login / Register"}
               </Link>
             </div>
 
@@ -745,13 +773,13 @@ function MobileMenu({ isOpen, onClose, pathname }) {
               ))}
 
               <Link
-                href="/portal"
+                href={authenticated ? dashboardHref : "/portal"}
                 onClick={onClose}
                 className="flex items-center gap-2 px-5 py-3.5 text-[13px] font-semibold tracking-[0.04em] border-b border-gray-100"
                 style={{ color: NAVY_900 }}
               >
                 <Lock size={12} style={{ color: GOLD }} aria-hidden="true" />
-                Investor Login
+                {authenticated ? (dashboardLabel || "Investor Dashboard") : "Investor Login"}
               </Link>
             </nav>
 
@@ -916,6 +944,7 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const closeMobile = useCallback(() => setMobileOpen(false), []);
+  const { authenticated, dashboardHref, dashboardLabel } = useAuthSession();
 
   useEffect(() => {
     let ticking = false;
@@ -1054,7 +1083,7 @@ export default function Navbar() {
             aria-label="Account actions"
           >
             <Link
-              href="/portal"
+              href={authenticated ? dashboardHref : "/portal"}
               className="inline-flex items-center gap-2 h-11 px-6 text-[12px] font-extrabold tracking-[0.1em] uppercase transition-all duration-200"
               style={{
                 backgroundColor: GOLD,
@@ -1074,10 +1103,19 @@ export default function Navbar() {
                 e.currentTarget.style.boxShadow =
                   "0 6px 16px -6px rgba(201,162,74,0.55)";
               }}
-              aria-label="Login or register account"
+              aria-label={authenticated ? dashboardLabel : "Login or register account"}
             >
-              Login / Register
-              <ArrowUpRight size={11} aria-hidden="true" />
+              {authenticated ? (
+                <>
+                  {dashboardLabel}
+                  <ArrowUpRight size={11} aria-hidden="true" />
+                </>
+              ) : (
+                <>
+                  Login / Register
+                  <ArrowUpRight size={11} aria-hidden="true" />
+                </>
+              )}
             </Link>
           </div>
 
@@ -1103,7 +1141,14 @@ export default function Navbar() {
         </div>
       </header>
 
-      <MobileMenu isOpen={mobileOpen} onClose={closeMobile} pathname={pathname} />
+      <MobileMenu
+        isOpen={mobileOpen}
+        onClose={closeMobile}
+        pathname={pathname}
+        authenticated={authenticated}
+        dashboardHref={dashboardHref}
+        dashboardLabel={dashboardLabel}
+      />
     </>
   );
 }

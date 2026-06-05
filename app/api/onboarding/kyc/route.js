@@ -23,6 +23,26 @@ export async function POST(request) {
     return errorResponse("Please complete your profile first", 400);
   }
 
+  // Investors may defer the identity-document upload and finish the rest of
+  // onboarding. KYC stays "not_started", so subscriptions remain locked until
+  // they return and submit (enforced in checkSubscriptionEligibility).
+  let body = {};
+  try {
+    body = await request.json();
+  } catch {
+    /* no body — treat as a normal submit */
+  }
+
+  if (body?.skip === true) {
+    await updateOnboardingStep(user.id, "consents");
+    log.audit("user.kyc_skipped", { userId: user.id });
+    return successResponse({
+      message: "Identity verification deferred. You can complete it any time from your dashboard.",
+      nextStep: "consents",
+      skipped: true,
+    });
+  }
+
   try {
     const docs = await getUserKycDocuments(user.id);
     const uploadedTypes = new Set(docs.map((d) => d.documentType));
