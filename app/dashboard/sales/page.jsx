@@ -178,7 +178,7 @@ function HoldingsToSell({ holdings, loading, onSold }) {
 }
 
 // ─── Sale request row ───────────────────────────────────────────────────────
-function SaleRow({ sale, isLast, index, onCancel, cancellingId }) {
+function SaleRow({ sale, isLast, index, onCancel, cancellingId, highlight }) {
   const meta = STATUS_META[sale.status] || { label: sale.status, dot: C.muted, text: C.secondary };
   const name = sale.spv?.opportunity?.title || sale.spv?.spvName || "SPV";
   const canCancel = sale.status === "REQUESTED" || sale.status === "UNDER_REVIEW";
@@ -187,8 +187,15 @@ function SaleRow({ sale, isLast, index, onCancel, cancellingId }) {
   const cancelling = cancellingId === sale.id;
 
   return (
-    <motion.tr initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, ease: EASE, delay: index * 0.03 }}
-      style={{ borderBottom: isLast ? "none" : `1px solid ${C.border}` }} className="group hover:bg-[#F8F8FB] transition-colors align-top">
+    <motion.tr id={`sale-row-${sale.id}`} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, ease: EASE, delay: index * 0.03 }}
+      style={{
+        borderBottom: isLast ? "none" : `1px solid ${C.border}`,
+        backgroundColor: highlight ? C.goldDim : undefined,
+        boxShadow: highlight ? `inset 3px 0 0 ${C.gold}` : undefined,
+        scrollMarginTop: 96,
+        transition: "background-color 0.4s ease, box-shadow 0.4s ease",
+      }}
+      className="group hover:bg-[#F8F8FB] align-top">
       <td className="py-4 pl-6 pr-4 align-top" style={{ minWidth: 110 }}>
         <p className="text-[13px] font-semibold" style={{ color: C.ink }}>{fmtDate(sale.createdAt)}</p>
         <p className="text-[11px] mt-0.5" style={{ color: C.muted }}>{fmtTime(sale.createdAt)}</p>
@@ -293,6 +300,7 @@ export default function SalesPage() {
   const [filter, setFilter] = useState("ALL");
   const [cancellingId, setCancellingId] = useState(null);
   const [toast, setToast] = useState(null);
+  const [highlightId, setHighlightId] = useState(null);
 
   const loadRequests = useCallback(async () => {
     try {
@@ -317,6 +325,18 @@ export default function SalesPage() {
   }, []);
 
   useEffect(() => { loadRequests(); loadHoldings(); }, [loadRequests, loadHoldings]);
+
+  // Deep-link from a notification (e.g. "Your share sale has been completed"):
+  // /dashboard/sales?request=<id> → land on the All view, jump to the request's
+  // page, scroll to it, and highlight it briefly. Read once on mount.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const id = new URLSearchParams(window.location.search).get("request");
+    if (id) {
+      setHighlightId(id);
+      setFilter("ALL");
+    }
+  }, []);
 
   function showToast(msg, tone = "success") {
     setToast({ msg, tone });
@@ -397,6 +417,20 @@ export default function SalesPage() {
   const pageStart = (page - 1) * PAGE_SIZE;
   const pageRows = filtered.slice(pageStart, pageStart + PAGE_SIZE);
   useEffect(() => { setPage(1); }, [filter, search]);
+
+  // Once the deep-linked request is known and data has loaded, jump to its
+  // page, scroll it into view, then fade the highlight out.
+  useEffect(() => {
+    if (!highlightId || loading) return;
+    const idx = filtered.findIndex((r) => r.id === highlightId);
+    if (idx === -1) return;
+    setPage(Math.floor(idx / PAGE_SIZE) + 1);
+    const scrollT = setTimeout(() => {
+      document.getElementById(`sale-row-${highlightId}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
+    }, 150);
+    const clearT = setTimeout(() => setHighlightId(null), 4500);
+    return () => { clearTimeout(scrollT); clearTimeout(clearT); };
+  }, [highlightId, loading, filtered]);
 
   const currency = requests[0]?.currency || holdings[0]?.currency || "GBP";
   const symbol = sym(currency);
@@ -520,7 +554,7 @@ export default function SalesPage() {
               {loading ? <SkeletonRows />
                 : error ? <tr><td colSpan={6} className="py-12 text-center"><div className="flex flex-col items-center gap-2"><AlertCircle size={18} style={{ color: C.danger }} /><p className="text-[13px]" style={{ color: C.danger }}>{error}</p></div></td></tr>
                 : pageRows.length === 0 ? <EmptyState filtered={filter !== "ALL" || search.trim() !== ""} hasHoldings={holdings.length > 0} />
-                : <AnimatePresence mode="wait">{pageRows.map((sale, i) => <SaleRow key={sale.id} sale={sale} index={i} isLast={i === pageRows.length - 1} onCancel={handleCancel} cancellingId={cancellingId} />)}</AnimatePresence>}
+                : <AnimatePresence mode="wait">{pageRows.map((sale, i) => <SaleRow key={sale.id} sale={sale} index={i} isLast={i === pageRows.length - 1} onCancel={handleCancel} cancellingId={cancellingId} highlight={sale.id === highlightId} />)}</AnimatePresence>}
             </tbody>
           </table>
         </div>

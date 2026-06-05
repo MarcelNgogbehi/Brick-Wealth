@@ -13,6 +13,7 @@ import {
   Bell, MessageSquare, ShieldCheck, UserPlus, Wallet, Megaphone,
   CheckCheck, Inbox, AlertCircle,
 } from "lucide-react";
+import { playNotificationSound, useAudioWarmup } from "@/lib/notificationSound";
 
 const C = {
   ink: "#0B1220",
@@ -59,7 +60,11 @@ export default function AdminNotificationBell() {
   const [unread, setUnread] = useState(0);
   const [open, setOpen] = useState(false);
   const wrapRef = useRef(null);
-  const prevUnread = useRef(0);
+  // null = first load (don't chime for the existing backlog); Set<id> after.
+  const knownIdsRef = useRef(null);
+
+  // Keep the shared AudioContext warm so the chime can play on new drops.
+  useAudioWarmup();
 
   const fetchNotifs = useCallback(async () => {
     try {
@@ -67,7 +72,18 @@ export default function AdminNotificationBell() {
       if (!res.ok) return;
       const d = await res.json();
       if (d.success) {
-        setRecent(d.recent || []);
+        const incoming = d.recent || [];
+
+        // Chime when a genuinely new unread notification drops in — every
+        // category, no exception. Skipped on the very first fetch so opening
+        // the console with a backlog of unreads doesn't blast a chime.
+        if (knownIdsRef.current !== null) {
+          const hasNew = incoming.some((n) => !n.readAt && !knownIdsRef.current.has(n.id));
+          if (hasNew) playNotificationSound();
+        }
+        knownIdsRef.current = new Set(incoming.map((n) => n.id));
+
+        setRecent(incoming);
         setUnread(d.unreadCount || 0);
       }
     } catch { /* ignore transient */ }
@@ -89,8 +105,6 @@ export default function AdminNotificationBell() {
     document.addEventListener("mousedown", fn);
     return () => document.removeEventListener("mousedown", fn);
   }, [open]);
-
-  prevUnread.current = unread;
 
   async function markAll() {
     setUnread(0);

@@ -14,6 +14,7 @@ import {
   Bell, Sparkles, Building2, Megaphone, Shield, CreditCard,
   CheckCheck, Inbox,
 } from "lucide-react";
+import { playNotificationSound, useAudioWarmup } from "@/lib/notificationSound";
 
 const NAVY_900 = "#0A1F44";
 const CREAM = "#F8F4EC";
@@ -41,56 +42,6 @@ function getCsrfToken() {
   return m ? decodeURIComponent(m[1]) : "";
 }
 
-// AudioContext kept in module scope so it survives re-renders.
-// MUST only be created/resumed inside a user-gesture handler — browsers
-// block audio started outside a gesture (autoplay policy).
-let _audioCtx = null;
-
-// Called on every click/keydown/touchstart — keeps the context alive.
-// { once: true } is intentionally NOT used so it re-warms after browser
-// suspends the context during inactivity.
-function warmUpAudio() {
-  try {
-    const AudioCtx = window.AudioContext || window.webkitAudioContext;
-    if (!AudioCtx) return;
-    // Recreate if closed or missing
-    if (!_audioCtx || _audioCtx.state === "closed") {
-      _audioCtx = new AudioCtx();
-    }
-    if (_audioCtx.state === "suspended") {
-      _audioCtx.resume();
-    }
-  } catch {}
-}
-
-// Plays a two-tone chime. Only fires if the context is already "running"
-// (guaranteed by warmUpAudio having been called during a prior gesture).
-// Never tries to create or resume — that must happen in a gesture handler.
-function playNotificationSound() {
-  try {
-    if (!_audioCtx || _audioCtx.state !== "running") return;
-
-    const tones = [
-      { freq: 880,     start: 0,    peak: 0.02, end: 0.45, vol: 0.22 },
-      { freq: 1174.66, start: 0.18, peak: 0.20, end: 0.62, vol: 0.18 },
-    ];
-
-    tones.forEach(({ freq, start, peak, end, vol }) => {
-      const osc = _audioCtx.createOscillator();
-      const gain = _audioCtx.createGain();
-      osc.connect(gain);
-      gain.connect(_audioCtx.destination);
-      osc.type = "sine";
-      osc.frequency.value = freq;
-      gain.gain.setValueAtTime(0, _audioCtx.currentTime + start);
-      gain.gain.linearRampToValueAtTime(vol, _audioCtx.currentTime + peak);
-      gain.gain.exponentialRampToValueAtTime(0.0001, _audioCtx.currentTime + end);
-      osc.start(_audioCtx.currentTime + start);
-      osc.stop(_audioCtx.currentTime + end);
-    });
-  } catch {}
-}
-
 export default function NotificationBell() {
   const [open, setOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -102,13 +53,9 @@ export default function NotificationBell() {
   const knownIdsRef = useRef(null);
   const router = useRouter();
 
-  // Warm up AudioContext on first user interaction so it's ready when a
-  // notification arrives (browsers block audio until a gesture has occurred).
-  useEffect(() => {
-    const events = ["click", "keydown", "touchstart"];
-    events.forEach((e) => document.addEventListener(e, warmUpAudio, { once: true, passive: true }));
-    return () => events.forEach((e) => document.removeEventListener(e, warmUpAudio));
-  }, []);
+  // Keep the shared AudioContext warm on every gesture so the chime is ready
+  // when a notification arrives (and survives the browser suspending it).
+  useAudioWarmup();
 
   // Poll for new notifications
   useEffect(() => {

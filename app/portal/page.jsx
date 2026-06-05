@@ -143,19 +143,17 @@ function getErrorMessage(status, data) {
 // LOGO MARK
 // ═════════════════════════════════════════════════════════════════════════════
 function LogoMark({ size = 44 }) {
+  // Real brand mark (same asset as the public navbar) rather than a drawn glyph.
   return (
-    <svg width={size} height={size} viewBox="0 0 44 44" fill="none" aria-hidden="true">
-      <defs>
-        <linearGradient id="auth-gold" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor={GOLD_LIGHT} />
-          <stop offset="50%" stopColor={GOLD} />
-          <stop offset="100%" stopColor={GOLD_DARK} />
-        </linearGradient>
-      </defs>
-      <path d="M22 4 L36 12 L22 20 L8 12 Z" fill="url(#auth-gold)" stroke={GOLD_DARK} strokeWidth="0.5" />
-      <path d="M22 14 L36 22 L22 30 L8 22 Z" fill="url(#auth-gold)" stroke={GOLD_DARK} strokeWidth="0.5" opacity="0.92" />
-      <path d="M22 24 L36 32 L22 40 L8 32 Z" fill="url(#auth-gold)" stroke={GOLD_DARK} strokeWidth="0.5" opacity="0.84" />
-    </svg>
+    <Image
+      src={assets.logo}
+      alt="Bricks & Wealth Holdings"
+      width={size}
+      height={size}
+      priority
+      className="flex-shrink-0"
+      style={{ width: size, height: size, objectFit: "contain" }}
+    />
   );
 }
 
