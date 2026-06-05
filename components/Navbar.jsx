@@ -5,6 +5,7 @@ import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { assets } from "@/assets/assets";
+import { useAuthSession } from "@/lib/use-auth-session";
 import {
   ChevronDown,
   Home,
@@ -231,33 +232,6 @@ function flagUrl(cc) {
   return `https://flagcdn.com/40x30/${code}.png`;
 }
 
-// ─── Auth session (logged-in state for the navbar) ────────────────────────────
-// Swaps the "Login / Register" CTA for a "Dashboard" link once the visitor has
-// an active session. Re-checked on every route change so it updates right after
-// login/logout. Admins are routed to the admin console instead.
-function useAuthSession() {
-  const pathname = usePathname();
-  const [session, setSession] = useState(null); // null = still loading
-
-  useEffect(() => {
-    let dead = false;
-    fetch("/api/auth/session", { credentials: "same-origin", cache: "no-store" })
-      .then((r) => (r.ok ? r.json() : null))
-      .then((d) => { if (!dead) setSession(d || { authenticated: false }); })
-      .catch(() => { if (!dead) setSession({ authenticated: false }); });
-    return () => { dead = true; };
-  }, [pathname]);
-
-  const authenticated = !!session?.authenticated;
-  const role = session?.user?.role;
-  const isAdmin = role === "admin" || role === "super_admin";
-  return {
-    authenticated,
-    isAdmin,
-    dashboardHref: isAdmin ? "/admin" : "/dashboard",
-    dashboardLabel: isAdmin ? "Admin Console" : "Investor Dashboard",
-  };
-}
 
 // ─── Smart anchor click — smooth scroll if same page, normal nav if different ─
 function useSmartAnchorClick() {

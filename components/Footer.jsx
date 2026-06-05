@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import { assets } from "@/assets/assets";
+import { useAuthSession } from "@/lib/use-auth-session";
 import {
   ArrowUpRight,
   ChevronUp,
@@ -397,6 +398,7 @@ function NewsletterForm() {
 // ─── Footer ───────────────────────────────────────────────────────────────────
 export default function Footer() {
   const year = new Date().getFullYear();
+  const { authenticated, dashboardHref, dashboardLabel } = useAuthSession();
 
   return (
     <footer
@@ -590,7 +592,7 @@ export default function Footer() {
                 Book a Call <ArrowUpRight size={12} />
               </Link>
               <Link
-                href="/portal"
+                href={authenticated ? dashboardHref : "/portal"}
                 className="inline-flex items-center gap-2 text-[11.5px] font-bold tracking-[0.1em] uppercase px-6 py-4 border transition-all duration-200"
                 style={{
                   color: GOLD_LIGHT,
@@ -606,7 +608,7 @@ export default function Footer() {
                   e.currentTarget.style.background = "";
                 }}
               >
-                <Lock size={11} /> Investor Login
+                <Lock size={11} /> {authenticated ? (dashboardLabel || "Investor Dashboard") : "Investor Login"}
               </Link>
             </div>
           </div>
@@ -750,23 +752,33 @@ export default function Footer() {
                     </h3>
                   </div>
                   <ul className="flex flex-col gap-3" role="list">
-                    {col.links.map((link) => (
-                      <li key={link.href}>
-                        <Link
-                          href={link.href}
-                          className="text-[12.5px] leading-snug transition-colors duration-150 block"
-                          style={{ color: TEXT_MID }}
-                          onMouseEnter={(e) =>
-                            (e.currentTarget.style.color = GOLD_LIGHT)
-                          }
-                          onMouseLeave={(e) =>
-                            (e.currentTarget.style.color = TEXT_MID)
-                          }
-                        >
-                          {link.label}
-                        </Link>
-                      </li>
-                    ))}
+                    {col.links.map((link) => {
+                      // Swap the "Investor Login" entry for a dashboard link
+                      // once the visitor is signed in.
+                      const isLoginLink = link.href === "/portal";
+                      const href = authenticated && isLoginLink ? dashboardHref : link.href;
+                      const label =
+                        authenticated && isLoginLink
+                          ? dashboardLabel || "Investor Dashboard"
+                          : link.label;
+                      return (
+                        <li key={link.href}>
+                          <Link
+                            href={href}
+                            className="text-[12.5px] leading-snug transition-colors duration-150 block"
+                            style={{ color: TEXT_MID }}
+                            onMouseEnter={(e) =>
+                              (e.currentTarget.style.color = GOLD_LIGHT)
+                            }
+                            onMouseLeave={(e) =>
+                              (e.currentTarget.style.color = TEXT_MID)
+                            }
+                          >
+                            {label}
+                          </Link>
+                        </li>
+                      );
+                    })}
                   </ul>
                 </div>
               ))}
