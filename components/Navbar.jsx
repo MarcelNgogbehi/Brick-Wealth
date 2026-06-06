@@ -165,7 +165,7 @@ const NAV_ITEMS = [
     href: "/company",
     dropdown: [
       {
-        label: "About Bricks & Wealth",
+        label: "About Brick & Wealth",
         href: "/company#about",
         icon: Briefcase,
         description: "Founder story & vision",
@@ -191,7 +191,7 @@ function LogoMark() {
   return (
     <Image
       src={assets.logo}
-      alt="Bricks & Wealth Logo"
+      alt="Brick & Wealth Logo"
       width={44}
       height={44}
       priority
@@ -576,7 +576,7 @@ function MobileMenu({ isOpen, onClose, pathname, authenticated, dashboardHref, d
                 href="/"
                 onClick={onClose}
                 className="flex items-center gap-3"
-                aria-label="Bricks & Wealth — home"
+                aria-label="Brick & Wealth — home"
               >
                 <LogoMark />
                 <div className="flex flex-col leading-none">
@@ -870,7 +870,7 @@ function TopUtilityBar({ pathname }) {
           </span>
 
           <Link
-            href="/company/compliance"
+            href="/company#compliance"
             className="inline-flex items-center px-4 text-[11px] font-bold tracking-[0.16em] uppercase transition-colors hover:text-white"
             style={{ color: "rgba(255,255,255,0.7)" }}
           >
@@ -919,6 +919,19 @@ export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const closeMobile = useCallback(() => setMobileOpen(false), []);
   const { authenticated, dashboardHref, dashboardLabel } = useAuthSession();
+
+  // Only these routes render a full-bleed dark hero behind the navbar, where a
+  // transparent bar with white text reads correctly at the top of the page.
+  const isDarkHero =
+    pathname === "/" ||
+    ["/company", "/education", "/how-it-works", "/opportunities"].some(
+      (r) => pathname === r || pathname.startsWith(`${r}/`)
+    );
+  // Everywhere else (e.g. /register-interest and any light-background page) the
+  // bar must be solid white from the very top so the navy logo/links stay
+  // legible — exactly as it looks once scrolled. Dark-hero pages keep the
+  // transparent-over-hero look until the user scrolls.
+  const solid = scrolled || !isDarkHero;
 
   useEffect(() => {
     let ticking = false;
@@ -977,13 +990,13 @@ export default function Navbar() {
 
       <header
         className={`fixed top-0 left-0 right-0 z-30 w-full transition-all duration-[350ms] ease-[cubic-bezier(0.25,0.46,0.45,0.94)] ${
-          scrolled
+          solid
             ? "bg-white shadow-[0_1px_0_rgba(10,31,68,0.06),0_8px_28px_-12px_rgba(10,31,68,0.18)]"
             : "bg-transparent"
         }`}
         style={{ fontFamily: "var(--font-montserrat), sans-serif" }}
         role="banner"
-        aria-label="Bricks & Wealth site navigation"
+        aria-label="Brick & Wealth site navigation"
       >
         <TopUtilityBar pathname={pathname} />
 
@@ -991,13 +1004,13 @@ export default function Navbar() {
           <Link
             href="/"
             className="flex items-center gap-3.5 group flex-shrink-0"
-            aria-label="Bricks & Wealth — home"
+            aria-label="Brick & Wealth — home"
           >
             <LogoMark />
             <div className="flex flex-col leading-none">
               <span
                 className="font-extrabold text-[18px] tracking-[0.04em] uppercase transition-colors duration-[350ms]"
-                style={{ color: scrolled ? NAVY_900 : WHITE }}
+                style={{ color: solid ? NAVY_900 : WHITE }}
               >
                 Brick
                 <span
@@ -1017,7 +1030,7 @@ export default function Navbar() {
               </span>
               <span
                 className="font-semibold text-[18px] tracking-[0.04em] uppercase transition-colors duration-[350ms] hidden sm:block"
-                style={{ color: scrolled ? NAVY_900 : WHITE, marginTop: "2px" }}
+                style={{ color: solid ? NAVY_900 : WHITE, marginTop: "2px" }}
               >
                 Holdings
               </span>
@@ -1029,7 +1042,7 @@ export default function Navbar() {
                   fontWeight: 400,
                   fontSize: "12px",
                   letterSpacing: "0.06em",
-                  color: scrolled ? GOLD : GOLD_LIGHT,
+                  color: solid ? GOLD : GOLD_LIGHT,
                 }}
               >
                 Building Wealth, Brick by Brick
@@ -1046,7 +1059,7 @@ export default function Navbar() {
                 key={item.label}
                 item={item}
                 pathname={pathname}
-                scrolled={scrolled}
+                scrolled={solid}
               />
             ))}
           </nav>
@@ -1096,9 +1109,9 @@ export default function Navbar() {
           <button
             onClick={() => setMobileOpen(true)}
             className="lg:hidden p-2 rounded transition-colors"
-            style={{ color: scrolled ? NAVY_900 : WHITE }}
+            style={{ color: solid ? NAVY_900 : WHITE }}
             onMouseEnter={(e) =>
-              (e.currentTarget.style.backgroundColor = scrolled
+              (e.currentTarget.style.backgroundColor = solid
                 ? CREAM
                 : "rgba(255,255,255,0.1)")
             }

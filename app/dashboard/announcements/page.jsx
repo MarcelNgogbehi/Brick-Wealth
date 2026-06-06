@@ -87,7 +87,7 @@ export default function AnnouncementsPage() {
       >
         <div>
           <p className="text-[11px] font-bold tracking-[0.22em] uppercase mb-2" style={{ color: C.gold }}>
-            From Bricks &amp; Wealth
+            From Brick &amp; Wealth
           </p>
           <h1 className="text-[38px] lg:text-[46px] leading-none" style={{ color: C.ink, fontFamily: SERIF, fontWeight: 500, letterSpacing: "-0.01em" }}>
             Announcements

@@ -71,6 +71,7 @@ export default function SubscribeModal({ opportunity, onClose, onSubscribed }) {
   const [suitabilityAnswers, setSuitabilityAnswers] = useState({});
   const [selfCertified, setSelfCertified] = useState(false);
   const [riskAcknowledged, setRiskAcknowledged] = useState(false);
+  const [affordabilityConfirmed, setAffordabilityConfirmed] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
   const [successData, setSuccessData] = useState(null);
@@ -91,7 +92,7 @@ export default function SubscribeModal({ opportunity, onClose, onSubscribed }) {
       });
     }
     if (currentStep === "terms") {
-      return selfCertified && riskAcknowledged;
+      return selfCertified && riskAcknowledged && affordabilityConfirmed;
     }
     return true;
   }
@@ -220,6 +221,7 @@ export default function SubscribeModal({ opportunity, onClose, onSubscribed }) {
                   unitPrice={unitPrice}
                   currencySymbol={currencySymbol}
                   totalAmount={totalAmount}
+                  totalUnits={spv?.totalUnits ?? 0}
                   oversized={oversized}
                 />
               )}
@@ -236,6 +238,8 @@ export default function SubscribeModal({ opportunity, onClose, onSubscribed }) {
                   setSelfCertified={setSelfCertified}
                   riskAcknowledged={riskAcknowledged}
                   setRiskAcknowledged={setRiskAcknowledged}
+                  affordabilityConfirmed={affordabilityConfirmed}
+                  setAffordabilityConfirmed={setAffordabilityConfirmed}
                   riskWarning={opportunity?.riskWarning}
                 />
               )}
@@ -357,11 +361,15 @@ function Overlay({ children, onClose }) {
 
 // ─── Step 1: Units ───────────────────────────────────────────────
 
-function UnitsStep({ units, setUnits, minimumUnits, remainingUnits, unitPrice, currencySymbol, totalAmount, oversized }) {
+function UnitsStep({ units, setUnits, minimumUnits, remainingUnits, unitPrice, currencySymbol, totalAmount, totalUnits, oversized }) {
   function clamp(v) {
     if (isNaN(v)) return minimumUnits;
     return Math.max(minimumUnits, Math.min(remainingUnits, Math.floor(v)));
   }
+
+  // Plain-English ownership summary (developer brief).
+  const ownershipPct = totalUnits > 0 ? (units / totalUnits) * 100 : 0;
+  const ownershipStr = ownershipPct >= 0.01 ? `${ownershipPct.toFixed(2)}%` : "<0.01%";
 
   return (
     <div>
@@ -466,6 +474,20 @@ function UnitsStep({ units, setUnits, minimumUnits, remainingUnits, unitPrice, c
         </span>
       </div>
 
+      {/* Plain-English ownership summary (developer brief) */}
+      <div
+        className="mt-3 p-3.5"
+        style={{ backgroundColor: "#FBF8F1", border: "1px solid rgba(201,162,74,0.3)", borderRadius: "10px" }}
+      >
+        <p className="text-[12.5px] leading-relaxed" style={{ color: INK }}>
+          You&apos;re buying <strong>{units.toLocaleString("en-GB")} {units === 1 ? "unit" : "units"}</strong>{" "}
+          for <strong>{currencySymbol}{totalAmount.toLocaleString("en-GB", { minimumFractionDigits: 0, maximumFractionDigits: 2 })}</strong>
+          {totalUnits > 0 && (
+            <>, giving you approximately <strong>{ownershipStr}</strong> ownership of the SPV</>
+          )}.
+        </p>
+      </div>
+
       <p className="mt-3 text-[11px]" style={{ color: TEXT_MUTED }}>
         Minimum {minimumUnits} · {remainingUnits.toLocaleString("en-GB")} units available
       </p>
@@ -555,7 +577,7 @@ function SuitabilityStep({ questions, answers, setAnswers }) {
 
 // ─── Step 3: Terms ───────────────────────────────────────────────
 
-function TermsStep({ selfCertified, setSelfCertified, riskAcknowledged, setRiskAcknowledged, riskWarning }) {
+function TermsStep({ selfCertified, setSelfCertified, riskAcknowledged, setRiskAcknowledged, affordabilityConfirmed, setAffordabilityConfirmed, riskWarning }) {
   return (
     <div>
       <div className="flex items-center gap-2 mb-1">
@@ -594,11 +616,17 @@ function TermsStep({ selfCertified, setSelfCertified, riskAcknowledged, setRiskA
           label="Risk acknowledgement"
           text="I understand my capital is at risk, that returns are not guaranteed, and that I may get back less than I invest. Property is illiquid and my investment may be difficult to sell."
         />
+        <CheckboxRow
+          checked={affordabilityConfirmed}
+          onChange={setAffordabilityConfirmed}
+          label="Affordability"
+          text="I confirm I am investing within my means and could absorb the loss of this investment without it materially affecting my standard of living."
+        />
       </div>
 
       <p className="mt-4 text-[11px] leading-relaxed" style={{ color: TEXT_MUTED }}>
         By proceeding you agree to the Subscription Agreement, which will be generated
-        for your records. Bricks &amp; Wealth Holdings Ltd does not provide investment advice.
+        for your records. Brick &amp; Wealth Holdings Ltd does not provide investment advice.
       </p>
     </div>
   );

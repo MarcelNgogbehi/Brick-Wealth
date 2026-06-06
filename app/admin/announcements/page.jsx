@@ -474,7 +474,7 @@ function AnnouncementEditor({ initialData, onClose, onSaved, onError }) {
                     </span>
                   )}
                 </div>
-                <h3 className="text-[20px] leading-tight mb-2" style={{ color: C.ink, fontFamily: "'Cormorant Garamond', serif", fontWeight: 500, fontStyle: "italic" }}>
+                <h3 className="text-[20px] leading-tight mb-2" style={{ color: C.ink, fontFamily: "var(--font-cormorant), 'Cormorant Garamond', Georgia, serif", fontWeight: 500, fontStyle: "italic" }}>
                   {form.title || "Your title here"}
                 </h3>
                 <p className="text-[13px] whitespace-pre-wrap" style={{ color: C.ink2 }}>{form.body || "Your body here"}</p>

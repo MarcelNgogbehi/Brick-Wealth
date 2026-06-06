@@ -173,10 +173,10 @@ export default function LegalShell({ doc }) {
       {/* Top bar */}
       <header className="relative z-10 border-b" style={{ borderColor: "rgba(255,255,255,0.08)" }}>
         <div className="max-w-6xl mx-auto px-5 sm:px-8 h-[68px] flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-3 group" aria-label="Bricks & Wealth — home">
+          <Link href="/" className="flex items-center gap-3 group" aria-label="Brick & Wealth — home">
             <LogoMark size={34} />
             <span className="font-extrabold text-[14px] tracking-[0.04em] uppercase text-white hidden sm:block">
-              Bricks<span className="mx-0.5" style={{ fontFamily: "var(--font-cormorant), serif", fontStyle: "italic", fontWeight: 500, fontSize: "16px", color: GOLD_LIGHT }}>&amp;</span>Wealth
+              Brick<span className="mx-0.5" style={{ fontFamily: "var(--font-cormorant), serif", fontStyle: "italic", fontWeight: 500, fontSize: "16px", color: GOLD_LIGHT }}>&amp;</span>Wealth
             </span>
           </Link>
           <div className="flex items-center gap-2">
@@ -337,10 +337,10 @@ export default function LegalShell({ doc }) {
             <div className="max-w-md">
               <div className="flex items-center gap-2.5 mb-3">
                 <LogoMark size={28} />
-                <span className="font-extrabold text-[13px] tracking-[0.04em] uppercase text-white">Bricks &amp; Wealth Holdings</span>
+                <span className="font-extrabold text-[13px] tracking-[0.04em] uppercase text-white">Brick &amp; Wealth Holdings</span>
               </div>
               <p className="text-[11.5px] leading-relaxed" style={{ color: "rgba(255,255,255,0.45)" }}>
-                Bricks &amp; Wealth Holdings Ltd is registered in England &amp; Wales (Company No. 14582930).
+                Brick &amp; Wealth Holdings Ltd is registered in England &amp; Wales (Company No. 14582930).
                 Registered office: London EC2M, United Kingdom. Property investment puts your capital at risk.
               </p>
             </div>
@@ -355,7 +355,7 @@ export default function LegalShell({ doc }) {
             </div>
           </div>
           <p className="text-[10.5px] mt-8 pt-6 border-t" style={{ color: "rgba(255,255,255,0.35)", borderColor: "rgba(255,255,255,0.06)" }}>
-            © {new Date().getFullYear()} Bricks &amp; Wealth Holdings Ltd. All rights reserved.
+            © {new Date().getFullYear()} Brick &amp; Wealth Holdings Ltd. All rights reserved.
           </p>
         </div>
       </footer>

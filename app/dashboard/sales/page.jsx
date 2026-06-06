@@ -588,7 +588,7 @@ export default function SalesPage() {
           <Link href="/dashboard/holdings" className="text-[12px]" style={{ color: C.muted, textDecoration: "none" }}>My Holdings</Link>
           <Link href="/dashboard/documents" className="text-[12px]" style={{ color: C.muted, textDecoration: "none" }}>Share Transfer Policy</Link>
         </div>
-        <p className="text-[11.5px]" style={{ color: C.muted }}>© {new Date().getFullYear()} Bricks &amp; Wealth Holdings Ltd. All investment data is encrypted and secure.</p>
+        <p className="text-[11.5px]" style={{ color: C.muted }}>© {new Date().getFullYear()} Brick &amp; Wealth Holdings Ltd. All investment data is encrypted and secure.</p>
       </div>
 
       {/* ── Toast ── */}

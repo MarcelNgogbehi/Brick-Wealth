@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useState, useRef, useEffect } from "react";
 import { motion, useInView, AnimatePresence } from "framer-motion";
+import { useRegisterInterest } from "@/components/RegisterInterestModal";
+import { useAuthSession } from "@/lib/use-auth-session";
 import {
   ArrowUpRight,
   ArrowRight,
@@ -50,8 +52,42 @@ const STRATEGY_COLORS = {
   "Off-Plan": "#0F6E56",
   Commercial: "#3D3A35",
 };
+// Where a public opportunity card should take the visitor when clicked:
+//   • guest    → portal (login / register)
+//   • investor → their dashboard view of that opportunity
+//   • admin    → the admin opportunity record
+// Used by every card component + the page so the destination is consistent.
+function useOpportunityHref() {
+  const { authenticated, isAdmin } = useAuthSession();
+  return (id) =>
+    !authenticated
+      ? "/portal"
+      : isAdmin
+      ? `/admin/opportunities/${id}`
+      : `/dashboard/opportunities/${id}`;
+}
+
 function getTagColor(category) {
   return STRATEGY_COLORS[category] || NAVY_700;
+}
+
+// Per the developer brief, public teaser cards show no pricing. We gate the
+// monetary figures (valuation, share price, raise amounts) behind the
+// invitation wall — guests see a locked placeholder; signed-in members see
+// the real figure.
+function LockedFigure({ size = 13 }) {
+  return (
+    <span
+      className="inline-flex items-center gap-1"
+      style={{ color: GOLD_DARK }}
+      title="Pricing is shared with members"
+    >
+      <Lock size={size - 3} />
+      <span style={{ fontFamily: "var(--font-montserrat), sans-serif", fontSize: 11, fontWeight: 700, letterSpacing: "0.04em" }}>
+        Members
+      </span>
+    </span>
+  );
 }
 
 // ─── Live SPVs ────────────────────────────────────────────────────────────────
@@ -365,7 +401,7 @@ function PageHero() {
                 className="text-[11px] font-bold tracking-[0.32em] uppercase"
                 style={{ color: GOLD_LIGHT }}
               >
-                The Bricks &amp; Wealth Portfolio
+                The Brick &amp; Wealth Portfolio
               </span>
             </motion.div>
 
@@ -681,6 +717,8 @@ function LiveSPVCard({ spv, index }) {
   const [hovered, setHovered] = useState(false);
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-40px" });
+  const opportunityHref = useOpportunityHref();
+  const { authenticated } = useAuthSession();
 
   return (
     <motion.div
@@ -690,7 +728,7 @@ function LiveSPVCard({ spv, index }) {
       transition={{ duration: 0.65, delay: index * 0.08 }}
     >
       <Link
-        href={`/opportunities/${spv.id}`}
+        href={opportunityHref(spv.id)}
         className="flex flex-col overflow-hidden block"
         style={{
           backgroundColor: WHITE,
@@ -823,8 +861,8 @@ function LiveSPVCard({ spv, index }) {
 
           <div className="grid grid-cols-4 gap-2 mb-5">
             {[
-              { label: "Property Value", value: spv.propertyValue, accent: false },
-              { label: "Per Share", value: spv.minPerShare, accent: true },
+              { label: "Property Value", value: authenticated ? spv.propertyValue : <LockedFigure />, accent: false },
+              { label: "Per Share", value: authenticated ? spv.minPerShare : <LockedFigure />, accent: true },
               { label: "Target Yield", value: spv.targetYield, accent: false },
               { label: "Hold", value: spv.holdPeriod, accent: false },
             ].map((stat) => (
@@ -866,7 +904,7 @@ function LiveSPVCard({ spv, index }) {
                 className="text-[10px] font-bold tracking-[0.16em] uppercase"
                 style={{ color: INK_DIM }}
               >
-                {spv.raisedSoFar} of {spv.raiseTarget} raised
+                {authenticated ? `${spv.raisedSoFar} of ${spv.raiseTarget} raised` : "Funding in progress"}
               </span>
               <span
                 className="text-[11px] font-extrabold"
@@ -914,7 +952,7 @@ function LiveSPVCard({ spv, index }) {
                 className="inline-flex items-center gap-1.5 text-[11px] font-extrabold tracking-[0.12em] uppercase"
                 style={{ color: hovered ? GOLD_DARK : INK_MID }}
               >
-                Subscribe
+                View Details
                 <ArrowUpRight size={12} />
               </div>
             </div>
@@ -932,6 +970,7 @@ function UpcomingSPVCard({ spv, index }) {
   const [notify, setNotify] = useState(false);
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-40px" });
+  const { authenticated } = useAuthSession();
 
   return (
     <motion.div
@@ -1040,7 +1079,7 @@ function UpcomingSPVCard({ spv, index }) {
         >
           {[
             { label: "Expected Yield", value: spv.expectedYield, accent: true },
-            { label: "Min Per Share", value: spv.expectedMin, accent: false },
+            { label: "Min Per Share", value: authenticated ? spv.expectedMin : <LockedFigure />, accent: false },
             { label: "Hold Period", value: spv.expectedHold, accent: false },
           ].map((stat) => (
             <div
@@ -1112,6 +1151,8 @@ function UpcomingSPVCard({ spv, index }) {
 function PastSPVCard({ spv, index }) {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-40px" });
+  const opportunityHref = useOpportunityHref();
+  const { authenticated } = useAuthSession();
   const beatTarget =
     parseFloat(spv.deliveredYield) > parseFloat(spv.targetYield);
 
@@ -1123,7 +1164,7 @@ function PastSPVCard({ spv, index }) {
       transition={{ duration: 0.65, delay: index * 0.08 }}
     >
       <Link
-        href={`/opportunities/${spv.id}`}
+        href={opportunityHref(spv.id)}
         className="flex flex-col md:flex-row items-stretch overflow-hidden block group"
         style={{
           backgroundColor: WHITE,
@@ -1267,7 +1308,7 @@ function PastSPVCard({ spv, index }) {
                   color: INK,
                 }}
               >
-                {spv.raised}
+                {authenticated ? spv.raised : <LockedFigure size={16} />}
               </p>
               <p
                 className="text-[8.5px] font-bold tracking-[0.1em] uppercase"
@@ -1289,6 +1330,8 @@ function PastSPVCard({ spv, index }) {
 export default function OpportunitiesPage() {
   const [activeSection, setActiveSection] = useState("live");
   const [activeStrategy, setActiveStrategy] = useState("All Strategies");
+  const { open: openRegisterInterest } = useRegisterInterest();
+  const opportunityHref = useOpportunityHref();
 
   const liveRef = useRef(null);
   const upcomingRef = useRef(null);
@@ -1342,7 +1385,7 @@ export default function OpportunitiesPage() {
           __html: JSON.stringify({
             "@context": "https://schema.org",
             "@type": "ItemList",
-            name: "Bricks & Wealth Opportunities",
+            name: "Brick & Wealth Opportunities",
             itemListElement: LIVE_SPVS.map((spv, i) => ({
               "@type": "ListItem",
               position: i + 1,
@@ -1524,9 +1567,10 @@ export default function OpportunitiesPage() {
                 </em>
               </h3>
             </div>
-            <Link
-              href="/register-interest"
-              className="inline-flex items-center gap-2 px-7 py-3.5 text-[11.5px] font-extrabold tracking-[0.14em] uppercase whitespace-nowrap transition-all duration-200"
+            <button
+              type="button"
+              onClick={() => openRegisterInterest("opportunities-launch-alerts")}
+              className="inline-flex items-center gap-2 px-7 py-3.5 text-[11.5px] font-extrabold tracking-[0.14em] uppercase whitespace-nowrap transition-all duration-200 cursor-pointer"
               style={{
                 backgroundColor: GOLD,
                 color: NAVY_900,
@@ -1542,7 +1586,7 @@ export default function OpportunitiesPage() {
             >
               Notify Me of All Launches
               <ArrowUpRight size={12} />
-            </Link>
+            </button>
           </motion.div>
         </div>
       </section>
@@ -1742,7 +1786,7 @@ export default function OpportunitiesPage() {
                       transition={{ duration: 0.5, delay: i * 0.06 }}
                     >
                       <Link
-                        href={`/opportunities/${spv.id}`}
+                        href={opportunityHref(spv.id)}
                         className="block overflow-hidden h-full transition-all duration-300 group"
                         style={{
                           backgroundColor: "rgba(255,255,255,0.03)",
@@ -1942,14 +1986,15 @@ export default function OpportunitiesPage() {
               className="text-[14.5px] leading-relaxed max-w-xl mx-auto mb-8"
               style={{ color: "rgba(255,255,255,0.72)" }}
             >
-              Bricks &amp; Wealth is a private platform. Request an invitation to
+              Brick &amp; Wealth is a private platform. Request an invitation to
               unlock full SPV documentation, subscribe to opportunities, and
               build your UK property portfolio.
             </p>
             <div className="flex items-center justify-center gap-3 flex-wrap">
-              <Link
-                href="/register-interest"
-                className="inline-flex items-center gap-2 px-7 py-4 text-[11.5px] font-extrabold tracking-[0.14em] uppercase transition-all duration-200"
+              <button
+                type="button"
+                onClick={() => openRegisterInterest("opportunities-cta")}
+                className="inline-flex items-center gap-2 px-7 py-4 text-[11.5px] font-extrabold tracking-[0.14em] uppercase transition-all duration-200 cursor-pointer"
                 style={{
                   backgroundColor: GOLD,
                   color: NAVY_900,
@@ -1967,7 +2012,7 @@ export default function OpportunitiesPage() {
               >
                 Request Invitation
                 <ArrowUpRight size={12} />
-              </Link>
+              </button>
               <Link
                 href="/portal"
                 className="inline-flex items-center gap-2 px-7 py-4 text-[11.5px] font-bold tracking-[0.12em] uppercase border transition-all duration-200"

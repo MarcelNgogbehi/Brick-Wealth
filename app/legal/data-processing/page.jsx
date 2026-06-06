@@ -1,8 +1,8 @@
 import LegalShell from "../_components/LegalShell";
 
 export const metadata = {
-  title: "KYC Data Processing Notice · Bricks & Wealth",
-  description: "How Bricks & Wealth processes your identity-verification (KYC) data for anti-money-laundering checks.",
+  title: "KYC Data Processing Notice · Brick & Wealth",
+  description: "How Brick & Wealth processes your identity-verification (KYC) data for anti-money-laundering checks.",
 };
 
 const doc = {

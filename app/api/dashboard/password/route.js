@@ -133,7 +133,7 @@ export async function POST(request) {
         userId: user.id,
         category: NOTIFY.SECURITY_ALERT,
         title: "Your password was changed",
-        body: `Your Bricks & Wealth password was changed on ${new Date().toLocaleString("en-GB", { dateStyle: "long", timeStyle: "short" })}. If this wasn't you, please contact support@brickandwealth.com immediately and reset your password.`,
+        body: `Your Brick & Wealth password was changed on ${new Date().toLocaleString("en-GB", { dateStyle: "long", timeStyle: "short" })}. If this wasn't you, please contact support@brickandwealth.com immediately and reset your password.`,
         link: "/dashboard/profile",
         metadata: { event: "password_changed", ip },
       }).catch((err) => console.error("[password.change.notify] error:", err?.message));

@@ -1,8 +1,8 @@
 import LegalShell from "../_components/LegalShell";
 
 export const metadata = {
-  title: "Risk Warning · Bricks & Wealth",
-  description: "The key risks of investing in property through Bricks & Wealth. Your capital is at risk.",
+  title: "Risk Warning · Brick & Wealth",
+  description: "The key risks of investing in property through Brick & Wealth. Your capital is at risk.",
 };
 
 const doc = {
@@ -13,7 +13,7 @@ const doc = {
   updated: "5 June 2026",
   contactEmail: "compliance@brickandwealth.com",
   summary:
-    "Investing in property through Bricks & Wealth puts your capital at risk. This warning explains the main risks so you can make an informed decision. Please read it in full before you subscribe to any opportunity. If anything is unclear, seek independent financial advice.",
+    "Investing in property through Brick & Wealth puts your capital at risk. This warning explains the main risks so you can make an informed decision. Please read it in full before you subscribe to any opportunity. If anything is unclear, seek independent financial advice.",
   keyPoints: [
     "Don't invest unless you're prepared to lose all the money you invest.",
     "Past performance does not predict future results.",
@@ -28,7 +28,7 @@ const doc = {
       heading: "The headline risk",
       body: [
         { note: "Property investment is high-risk. You could lose some or all of the money you invest. You should not invest more than you can afford to lose, and you should build a diversified portfolio rather than concentrating your money in a single investment." },
-        "Bricks & Wealth offers co-investment in UK property through ring-fenced Special Purpose Vehicles (SPVs). These are long-term, illiquid investments designed for investors who understand and accept the risks set out below.",
+        "Brick & Wealth offers co-investment in UK property through ring-fenced Special Purpose Vehicles (SPVs). These are long-term, illiquid investments designed for investors who understand and accept the risks set out below.",
       ],
     },
     {
@@ -85,7 +85,7 @@ const doc = {
       id: "protection",
       heading: "Regulatory protection & advice",
       body: [
-        "Bricks & Wealth operates an execution-only platform and does not provide personal recommendations or financial advice. We do not assess whether an investment is suitable for you.",
+        "Brick & Wealth operates an execution-only platform and does not provide personal recommendations or financial advice. We do not assess whether an investment is suitable for you.",
         { note: "These investments are not protected by the Financial Services Compensation Scheme (FSCS) in respect of investment losses. If an SPV or the underlying property performs poorly, you will not be compensated for the resulting loss." },
         "If you are unsure whether an investment is right for you, you should seek advice from an independent financial adviser authorised by the Financial Conduct Authority.",
       ],

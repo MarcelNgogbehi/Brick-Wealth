@@ -532,7 +532,7 @@ export default function OperatingPrinciplesGrid() {
             {
               label: "Speak With Our Team",
               sub: "Independent advisors on call",
-              href: "/company#contact",
+              href: "/company/contact",
             },
           ].map((tile) => (
             <InfoTile key={tile.label} {...tile} />

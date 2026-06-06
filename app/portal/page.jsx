@@ -147,7 +147,7 @@ function LogoMark({ size = 44 }) {
   return (
     <Image
       src={assets.logo}
-      alt="Bricks & Wealth Holdings"
+      alt="Brick & Wealth Holdings"
       width={size}
       height={size}
       priority
@@ -304,7 +304,7 @@ function CountryOption({ country, selected, onClick }) {
 const SHOWCASE = [
   { image: "https://images.unsplash.com/photo-1582268611958-ebfd161ef9cf?w=1800&q=85&auto=format&fit=crop", name: "The Wilbraham", location: "Manchester · M14", spv: "SPV-008", yield: "8.4%", quote: "I never thought I'd own a piece of UK property at my age — let alone four of them.", investor: "K. Adesanya · Investor since 2026" },
   { image: "https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=1800&q=85&auto=format&fit=crop", name: "Holloway Court", location: "London · N7", spv: "SPV-010", yield: "11.2%", quote: "The transparency is what convinced me. Every document, every figure — there for review.", investor: "M. Patel · Investor since 2026" },
-  { image: "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=1800&q=85&auto=format&fit=crop", name: "Roundhay Gardens", location: "Leeds · LS8", spv: "SPV-011", yield: "7.9%", quote: "From the diaspora, owning UK property felt impossible. Bricks & Wealth made it considered.", investor: "S. Okonkwo · Investor since 2026" },
+  { image: "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=1800&q=85&auto=format&fit=crop", name: "Roundhay Gardens", location: "Leeds · LS8", spv: "SPV-011", yield: "7.9%", quote: "From the diaspora, owning UK property felt impossible. Brick & Wealth made it considered.", investor: "S. Okonkwo · Investor since 2026" },
 ];
 
 function ShowcasePanel() {
@@ -331,11 +331,11 @@ function ShowcasePanel() {
       </div>
 
       <div className="relative z-10 p-10 flex items-start justify-between">
-        <Link href="/" className="flex items-center gap-3 group" aria-label="Bricks & Wealth — home">
+        <Link href="/" className="flex items-center gap-3 group" aria-label="Brick & Wealth — home">
           <LogoMark size={40} />
           <div className="flex flex-col leading-none">
             <span className="font-extrabold text-[16px] tracking-[0.04em] uppercase text-white">
-              Bricks<span className="mx-0.5" style={{ fontFamily: "var(--font-cormorant), serif", fontStyle: "italic", fontWeight: 500, fontSize: "20px", color: GOLD_LIGHT }}>&amp;</span>Wealth
+              Brick<span className="mx-0.5" style={{ fontFamily: "var(--font-cormorant), serif", fontStyle: "italic", fontWeight: 500, fontSize: "20px", color: GOLD_LIGHT }}>&amp;</span>Wealth
             </span>
             <span className="font-semibold text-[14px] tracking-[0.04em] uppercase text-white" style={{ marginTop: "2px" }}>
               Holdings
@@ -718,10 +718,10 @@ function AuthForm() {
       </div>
 
       <div className="lg:hidden relative z-10 p-6 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2" aria-label="Bricks & Wealth — home">
+        <Link href="/" className="flex items-center gap-2" aria-label="Brick & Wealth — home">
           <LogoMark size={32} />
           <span className="font-extrabold text-[14px] tracking-[0.04em] uppercase text-white">
-            Bricks<span className="mx-0.5" style={{ fontFamily: "var(--font-cormorant), serif", fontStyle: "italic", fontWeight: 500, fontSize: "16px", color: GOLD_LIGHT }}>&amp;</span>Wealth
+            Brick<span className="mx-0.5" style={{ fontFamily: "var(--font-cormorant), serif", fontStyle: "italic", fontWeight: 500, fontSize: "16px", color: GOLD_LIGHT }}>&amp;</span>Wealth
           </span>
         </Link>
         <Link href="/" className="text-[10.5px] font-bold tracking-[0.16em] uppercase" style={{ color: "rgba(255,255,255,0.6)" }}>← Back</Link>
@@ -911,7 +911,7 @@ function AuthForm() {
 
                   {mode !== "forgot" && (
                     <p className="text-[12px] text-center mt-2" style={{ color: "rgba(255,255,255,0.55)" }}>
-                      {mode === "login" ? (<>New to Bricks &amp; Wealth?{" "}<button type="button" onClick={() => switchMode("register")} className="font-bold tracking-[0.04em] transition-colors" style={{ color: GOLD_LIGHT, background: "transparent", border: "none", cursor: "pointer", fontFamily: "inherit", fontSize: "12px" }}>Create an account</button></>) : (<>Already have an account?{" "}<button type="button" onClick={() => switchMode("login")} className="font-bold tracking-[0.04em] transition-colors" style={{ color: GOLD_LIGHT, background: "transparent", border: "none", cursor: "pointer", fontFamily: "inherit", fontSize: "12px" }}>Sign in</button></>)}
+                      {mode === "login" ? (<>New to Brick &amp; Wealth?{" "}<button type="button" onClick={() => switchMode("register")} className="font-bold tracking-[0.04em] transition-colors" style={{ color: GOLD_LIGHT, background: "transparent", border: "none", cursor: "pointer", fontFamily: "inherit", fontSize: "12px" }}>Create an account</button></>) : (<>Already have an account?{" "}<button type="button" onClick={() => switchMode("login")} className="font-bold tracking-[0.04em] transition-colors" style={{ color: GOLD_LIGHT, background: "transparent", border: "none", cursor: "pointer", fontFamily: "inherit", fontSize: "12px" }}>Sign in</button></>)}
                     </p>
                   )}
                 </form>

@@ -74,14 +74,14 @@ export async function POST(request, { params }) {
       return NextResponse.json({ success: false, message: "Investor account no longer exists." }, { status: 404 });
     }
 
-    const adminName = admin.fullName || "The Bricks & Wealth team";
+    const adminName = admin.fullName || "The Brick & Wealth team";
     const purpose = meta.purpose || "your message";
 
     // 1) LIVE notification to the investor — picked up by their bell poll
     await createNotificationRow({
       userId: investor.id,
       category: "support_reply",
-      title: `Reply from Bricks & Wealth — ${purpose}`,
+      title: `Reply from Brick & Wealth — ${purpose}`,
       body: message,
       link: "/dashboard/notifications",
       metadata: {

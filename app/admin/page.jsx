@@ -88,7 +88,7 @@ function Masthead({ greeting, summary, attention, syncedLabel, pendingKyc, pendi
       <div className="relative px-6 sm:px-8 py-7 sm:py-8 flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
         <div className="min-w-0">
           <div className="text-[10.5px] font-bold tracking-[0.24em] uppercase mb-3" style={{ color: "rgba(255,255,255,0.42)" }}>
-            Bricks<span style={{ color: C.gold }}>&amp;</span>Wealth · Admin Console
+            Brick<span style={{ color: C.gold }}>&amp;</span>Wealth · Admin Console
           </div>
           <h1 className="text-[26px] sm:text-[32px] font-bold leading-[1.05] tracking-[-0.02em]" style={{ color: "#fff" }}>
             {greeting}.
@@ -705,7 +705,7 @@ export default function AdminDashboard() {
       )}
 
       <div className="text-center text-[11px] pt-1 pb-2" style={{ color: C.slate }}>
-        Bricks<span style={{ color: C.gold }}>&amp;</span>Wealth Admin Console · figures update on each visit
+        Brick<span style={{ color: C.gold }}>&amp;</span>Wealth Admin Console · figures update on each visit
       </div>
     </motion.div>
   );

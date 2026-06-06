@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
+import { useRegisterInterest } from "@/components/RegisterInterestModal";
 import {
   ArrowUpRight,
   ArrowRight,
@@ -37,6 +38,7 @@ const STATS = [
 export default function TrustBand() {
   const sectionRef = useRef(null);
   const inView = useInView(sectionRef, { once: true, margin: "-100px" });
+  const { open: openRegisterInterest } = useRegisterInterest();
 
   return (
     <section
@@ -122,7 +124,7 @@ export default function TrustBand() {
                 className="text-[11px] font-bold tracking-[0.32em] uppercase"
                 style={{ color: GOLD_LIGHT }}
               >
-                Why Bricks &amp; Wealth
+                Why Brick &amp; Wealth
               </span>
             </motion.div>
 
@@ -237,7 +239,7 @@ export default function TrustBand() {
                   className="text-[13.5px] font-semibold"
                   style={{ color: WHITE }}
                 >
-                  Read about Bricks &amp; Wealth
+                  Read about Brick &amp; Wealth
                 </p>
               </div>
               <ArrowRight
@@ -431,9 +433,10 @@ export default function TrustBand() {
             </div>
 
             <div className="flex flex-wrap gap-3 flex-shrink-0">
-              <Link
-                href="/register-interest"
-                className="group inline-flex items-center gap-2 px-7 py-4 text-[11.5px] font-extrabold tracking-[0.14em] uppercase whitespace-nowrap transition-all duration-200"
+              <button
+                type="button"
+                onClick={() => openRegisterInterest("home-trustband")}
+                className="group inline-flex items-center gap-2 px-7 py-4 text-[11.5px] font-extrabold tracking-[0.14em] uppercase whitespace-nowrap transition-all duration-200 cursor-pointer"
                 style={{
                   backgroundColor: GOLD,
                   color: NAVY_900,
@@ -454,7 +457,7 @@ export default function TrustBand() {
                   size={12}
                   className="transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
                 />
-              </Link>
+              </button>
               <Link
                 href="/opportunities"
                 className="inline-flex items-center gap-2 px-7 py-4 text-[11.5px] font-bold tracking-[0.12em] uppercase whitespace-nowrap border transition-all duration-200"

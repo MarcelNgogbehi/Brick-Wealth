@@ -83,7 +83,7 @@ async function notifyEligibleInvestorsOfNewOpportunity(opp) {
     // Build a short body
     const summary = opp.summary
       ? (opp.summary.length > 240 ? opp.summary.slice(0, 240) + "..." : opp.summary)
-      : "A new investment opportunity is now available on Bricks & Wealth.";
+      : "A new investment opportunity is now available on Brick & Wealth.";
 
     await notifyMany({
       userIds: eligible.map((u) => u.id),

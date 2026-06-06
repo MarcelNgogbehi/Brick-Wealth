@@ -86,7 +86,7 @@ export async function POST(request, { params }) {
         userId: doc.userId,
         category: NOTIFY.SECURITY_ALERT,
         title: "Your account is fully activated",
-        body: "Your KYC verification has been approved. You can now subscribe to opportunities on Bricks & Wealth.",
+        body: "Your KYC verification has been approved. You can now subscribe to opportunities on Brick & Wealth.",
         link: "/dashboard",
         metadata: { kycStatus: "approved" },
       }).catch((err) => console.error("[kyc.approve.notify] error:", err?.message));

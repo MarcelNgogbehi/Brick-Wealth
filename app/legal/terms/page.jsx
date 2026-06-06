@@ -1,8 +1,8 @@
 import LegalShell from "../_components/LegalShell";
 
 export const metadata = {
-  title: "Terms of Service · Bricks & Wealth",
-  description: "The agreement governing your use of the Bricks & Wealth investment platform.",
+  title: "Terms of Service · Brick & Wealth",
+  description: "The agreement governing your use of the Brick & Wealth investment platform.",
 };
 
 const doc = {
@@ -13,7 +13,7 @@ const doc = {
   updated: "5 June 2026",
   contactEmail: "legal@brickandwealth.com",
   summary:
-    "These terms form a binding agreement between you and Bricks & Wealth Holdings Ltd. They explain what our platform does, the rules for using it, and the rights and responsibilities of both sides. Please read them carefully before creating an account or subscribing to an opportunity.",
+    "These terms form a binding agreement between you and Brick & Wealth Holdings Ltd. They explain what our platform does, the rules for using it, and the rights and responsibilities of both sides. Please read them carefully before creating an account or subscribing to an opportunity.",
   keyPoints: [
     "You must be 18+ and pass identity verification to invest.",
     "We operate property co-investment vehicles (SPVs) — not advice.",
@@ -27,7 +27,7 @@ const doc = {
       id: "about",
       heading: "Who we are",
       body: [
-        "Bricks & Wealth is a property co-investment platform operated by Bricks & Wealth Holdings Ltd, a company registered in England & Wales under company number 14582930, with its registered office in London EC2M, United Kingdom (\"Bricks & Wealth\", \"we\", \"us\", or \"our\").",
+        "Brick & Wealth is a property co-investment platform operated by Brick & Wealth Holdings Ltd, a company registered in England & Wales under company number 14582930, with its registered office in London EC2M, United Kingdom (\"Brick & Wealth\", \"we\", \"us\", or \"our\").",
         "We enable eligible investors to co-invest in UK residential property through ring-fenced Special Purpose Vehicles (\"SPVs\"). Each SPV is its own UK limited company with its own assets, records, and accounts.",
         { note: "These Terms of Service work alongside our Privacy Policy, Risk Warning, KYC Data Processing Notice, and Cookie Policy. Together they govern your relationship with us. Where an opportunity has its own subscription agreement, that document also applies to that specific investment." },
       ],
@@ -103,7 +103,7 @@ const doc = {
       id: "ip",
       heading: "Intellectual property",
       body: [
-        "The platform, its content, branding, and software are owned by or licensed to Bricks & Wealth and are protected by intellectual-property laws. We grant you a limited, non-exclusive, non-transferable licence to use the platform for your own investment purposes.",
+        "The platform, its content, branding, and software are owned by or licensed to Brick & Wealth and are protected by intellectual-property laws. We grant you a limited, non-exclusive, non-transferable licence to use the platform for your own investment purposes.",
         "You may download and retain documents relating to your own holdings. You must not copy, republish, or commercially exploit any other platform content without our written permission.",
       ],
     },

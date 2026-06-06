@@ -3,7 +3,7 @@
 // One-time script to create or promote a super_admin account.
 //
 // Usage (PowerShell):
-//   $env:ADMIN_EMAIL = "marcel@brickswealth.com"
+//   $env:ADMIN_EMAIL = "marcel@brickwealth.com"
 //   $env:ADMIN_USERNAME = "marcel-admin"
 //   $env:ADMIN_PASSWORD = "<your-strong-password>"
 //   $env:ADMIN_FULL_NAME = "Marcel Ngogbehei"

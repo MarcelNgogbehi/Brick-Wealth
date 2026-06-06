@@ -877,7 +877,7 @@ const CONSENT_ITEMS = [
     key: "terms_of_service",
     required: true,
     label: "I accept the Terms of Service",
-    description: "The agreement governing your use of the Bricks & Wealth platform.",
+    description: "The agreement governing your use of the Brick & Wealth platform.",
     href: "/legal/terms",
   },
   {
@@ -963,7 +963,7 @@ function StepConsents({ existingConsents, onComplete, onBack }) {
         eyebrow="Step 4 of 4 · Final Consents"
         title="Almost"
         accent="done."
-        body="Review and accept the agreements that govern your investor relationship with Bricks & Wealth."
+        body="Review and accept the agreements that govern your investor relationship with Brick & Wealth."
       />
 
       <div className="flex flex-col gap-3 mb-6">
@@ -1281,7 +1281,7 @@ function VerifyContent() {
           <Link href="/" className="flex items-center gap-3 group">
             <LogoMark size={36} />
             <span className="font-extrabold text-[14px] tracking-[0.04em] uppercase text-white">
-              Bricks<span className="mx-0.5" style={{ fontFamily: "var(--font-cormorant), serif", fontStyle: "italic", fontWeight: 500, fontSize: "16px", color: GOLD_LIGHT }}>&amp;</span>Wealth
+              Brick<span className="mx-0.5" style={{ fontFamily: "var(--font-cormorant), serif", fontStyle: "italic", fontWeight: 500, fontSize: "16px", color: GOLD_LIGHT }}>&amp;</span>Wealth
             </span>
           </Link>
         </div>
@@ -1486,7 +1486,7 @@ function DonePanel({ kycDeferred }) {
       <div>
         <p className="text-[11px] font-bold tracking-[0.32em] uppercase mb-3" style={{ color: GOLD_LIGHT }}>Account Activated</p>
         <h2 className="leading-tight mb-3" style={{ fontFamily: "var(--font-cormorant), serif", fontWeight: 500, fontSize: "36px", color: WHITE }}>
-          Welcome to <em style={{ color: GOLD_LIGHT, fontWeight: 400 }}>Bricks &amp; Wealth.</em>
+          Welcome to <em style={{ color: GOLD_LIGHT, fontWeight: 400 }}>Brick &amp; Wealth.</em>
         </h2>
         {kycDeferred ? (
           <p className="text-[13.5px] leading-relaxed" style={{ color: "rgba(255,255,255,0.7)" }}>

@@ -85,9 +85,9 @@ const NAV_COLS = [
   {
     heading: "Company",
     links: [
-      { label: "About Bricks & Wealth", href: "/company/about" },
+      { label: "About Brick & Wealth", href: "/company/about" },
       { label: "Founder Story", href: "/company/founder" },
-      { label: "Compliance & FCA", href: "/company/compliance" },
+      { label: "Compliance & FCA", href: "/company#compliance" },
       { label: "Insights & Reports", href: "/insights" },
       { label: "Careers", href: "/careers" },
       { label: "Contact & Book a Call", href: "/company/contact" },
@@ -149,12 +149,12 @@ const LEGAL = [
   { label: "Sitemap", href: "/sitemap" },
 ];
 
-// ─── Logo Mark — stacked golden bricks ────────────────────────────────────────
+// ─── Logo Mark — stacked golden brick ────────────────────────────────────────
 function LogoMark({ size = 38 }) {
   return (
     <Image
       src={assets.logo}
-      alt="Bricks & Wealth Logo"
+      alt="Brick & Wealth Logo"
       width={size}
       height={size}
       priority
@@ -407,7 +407,7 @@ export default function Footer() {
         backgroundColor: NAVY_950,
         fontFamily: "var(--font-montserrat), sans-serif",
       }}
-      aria-label="Bricks & Wealth site footer"
+      aria-label="Brick & Wealth site footer"
       role="contentinfo"
     >
       {/* SEO: Organization schema */}
@@ -417,8 +417,8 @@ export default function Footer() {
           __html: JSON.stringify({
             "@context": "https://schema.org",
             "@type": "Organization",
-            name: "Bricks & Wealth Holdings Ltd",
-            alternateName: "Bricks & Wealth",
+            name: "Brick & Wealth Holdings Ltd",
+            alternateName: "Brick & Wealth",
             url: SITE_URL,
             logo: `${SITE_URL}/logo.png`,
             description:
@@ -456,7 +456,7 @@ export default function Footer() {
             backgroundSize: "80px 80px",
           }}
         />
-        {/* Large faint logo bricks — top right */}
+        {/* Large faint logo brick — top right */}
         <svg
           className="absolute -top-20 -right-20 opacity-[0.035]"
           width="560"
@@ -547,7 +547,7 @@ export default function Footer() {
                 className="text-[15px] font-normal leading-relaxed max-w-xl"
                 style={{ color: TEXT_MID }}
               >
-                Bricks &amp; Wealth gives invited investors structured access to
+                Brick &amp; Wealth gives invited investors structured access to
                 carefully selected UK property opportunities — through transparent,
                 ring-fenced Special Purpose Vehicles, with the documents, oversight
                 and education you&apos;d expect from a traditional fund.
@@ -663,7 +663,7 @@ export default function Footer() {
               <Link
                 href="/"
                 className="flex items-center gap-3.5 mb-6 group"
-                aria-label="Bricks & Wealth — home"
+                aria-label="Brick & Wealth — home"
               >
                 <LogoMark size={42} />
                 <Wordmark size="md" />
@@ -836,7 +836,7 @@ export default function Footer() {
                     target="_blank"
                     rel="noopener noreferrer"
                     role="listitem"
-                    aria-label={`Follow Bricks & Wealth on ${label}`}
+                    aria-label={`Follow Brick & Wealth on ${label}`}
                     className="w-11 h-11 grid place-items-center transition-all duration-200"
                     style={{
                       border: `1px solid ${BORD_STRONG}`,
@@ -942,7 +942,7 @@ export default function Footer() {
               <span className="font-bold" style={{ color: TEXT_WHITE }}>
                 Risk warning ·
               </span>{" "}
-              Bricks &amp; Wealth investments are illiquid, long-term, and your
+              Brick &amp; Wealth investments are illiquid, long-term, and your
               capital is at risk. Past performance is not a reliable indicator of
               future results. The value of investments can go down as well as up.
               You may not get back the amount you originally invested. This site
@@ -981,7 +981,7 @@ export default function Footer() {
           {/* Copyright row */}
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <p className="text-[11.5px] leading-relaxed" style={{ color: TEXT_DIM }}>
-              © {year} Bricks &amp; Wealth Holdings Ltd. All rights reserved.
+              © {year} Brick &amp; Wealth Holdings Ltd. All rights reserved.
               Registered in England &amp; Wales · Company No. XXXXXXX.
             </p>
 
@@ -989,7 +989,7 @@ export default function Footer() {
               {/* Mini logo */}
               <Link
                 href="/"
-                aria-label="Bricks & Wealth home"
+                aria-label="Brick & Wealth home"
                 className="flex items-center gap-2.5 group"
               >
                 <LogoMark size={24} />

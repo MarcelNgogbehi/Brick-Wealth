@@ -42,7 +42,7 @@ const STEPS = [
     label: "Invitation",
     headline: "By Invitation Only",
     body:
-      "Bricks & Wealth is a private platform. Receive a direct founder invitation, an existing-investor referral, or register your interest to join the review waitlist.",
+      "Brick & Wealth is a private platform. Receive a direct founder invitation, an existing-investor referral, or register your interest to join the review waitlist.",
     bullets: [
       "Direct founder invitations",
       "Existing investor referrals",
@@ -473,7 +473,7 @@ export default function HowItWorksSection() {
               className="hidden text-[13.5px] leading-relaxed md:block md:text-right"
               style={{ color: INK_MID }}
             >
-              No surprises, no opacity. The Bricks &amp; Wealth journey is the same
+              No surprises, no opacity. The Brick &amp; Wealth journey is the same
               for every investor — clear, documented, and built to be reviewed by
               lawyers and regulators alike.
             </p>
@@ -525,7 +525,7 @@ export default function HowItWorksSection() {
             {
               label: "FCA-Aligned Onboarding",
               sub: "AML, KYC & GDPR compliant",
-              href: "/company/compliance",
+              href: "/company#compliance",
             },
             {
               label: "From £500 Per Share",

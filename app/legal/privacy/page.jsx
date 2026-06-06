@@ -1,8 +1,8 @@
 import LegalShell from "../_components/LegalShell";
 
 export const metadata = {
-  title: "Privacy Policy · Bricks & Wealth",
-  description: "How Bricks & Wealth collects, uses, and protects your personal data under UK GDPR.",
+  title: "Privacy Policy · Brick & Wealth",
+  description: "How Brick & Wealth collects, uses, and protects your personal data under UK GDPR.",
 };
 
 const doc = {
@@ -13,7 +13,7 @@ const doc = {
   updated: "5 June 2026",
   contactEmail: "privacy@brickandwealth.com",
   summary:
-    "This policy explains what personal data Bricks & Wealth Holdings Ltd collects about you, why we collect it, how we use and protect it, and the rights you have under the UK General Data Protection Regulation (UK GDPR) and the Data Protection Act 2018. We are the data controller for the information described here.",
+    "This policy explains what personal data Brick & Wealth Holdings Ltd collects about you, why we collect it, how we use and protect it, and the rights you have under the UK General Data Protection Regulation (UK GDPR) and the Data Protection Act 2018. We are the data controller for the information described here.",
   keyPoints: [
     "We are the data controller; our DPO can be reached at privacy@brickandwealth.com.",
     "We collect identity, contact, financial and usage data.",
@@ -27,7 +27,7 @@ const doc = {
       id: "controller",
       heading: "Who controls your data",
       body: [
-        "Bricks & Wealth Holdings Ltd (company number 14582930), registered office London EC2M, United Kingdom, is the \"data controller\" responsible for your personal data. That means we decide why and how your data is processed.",
+        "Brick & Wealth Holdings Ltd (company number 14582930), registered office London EC2M, United Kingdom, is the \"data controller\" responsible for your personal data. That means we decide why and how your data is processed.",
         "You can contact our Data Protection Officer at privacy@brickandwealth.com or by writing to the Data Protection Officer at our registered office.",
       ],
     },

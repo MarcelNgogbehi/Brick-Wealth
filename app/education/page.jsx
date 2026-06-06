@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState, useRef, useEffect } from "react";
 import { motion, useInView, AnimatePresence } from "framer-motion";
+import { useRegisterInterest } from "@/components/RegisterInterestModal";
 import {
   ArrowUpRight,
   ArrowRight,
@@ -159,7 +160,7 @@ const FTB_FAQS = [
     icon: FileText,
   },
   {
-    q: "Will Bricks & Wealth confirm this in writing?",
+    q: "Will Brick & Wealth confirm this in writing?",
     a: "Yes. Every subscription pack includes a structural summary and risk acknowledgement that explains how shareholding differs from direct ownership. We always recommend you have your own legal and tax advisor review your specific situation — and we can refer you to independent solicitors familiar with the B&W structure.",
     icon: CheckCircle2,
   },
@@ -251,7 +252,7 @@ const PAST_EVENTS = [
     views: "1,556",
   },
   {
-    title: "Founder AMA: First Year of Bricks & Wealth",
+    title: "Founder AMA: First Year of Brick & Wealth",
     date: "Jan 2026",
     duration: "73 min",
     views: "2,104",
@@ -1489,6 +1490,7 @@ function FAQItem({ faq, index, isOpen, onToggle }) {
 // SECTION 4: WEBINARS & EVENTS
 // ═════════════════════════════════════════════════════════════════════════════
 function EventsSection({ sectionRef }) {
+  const { open: openRegisterInterest } = useRegisterInterest();
   return (
     <section
       id="events"
@@ -1605,9 +1607,10 @@ function EventsSection({ sectionRef }) {
             </em>
           </h3>
           <div className="flex items-center justify-center gap-3 flex-wrap">
-            <Link
-              href="/register-interest"
-              className="inline-flex items-center gap-2 px-7 py-3.5 text-[11.5px] font-extrabold tracking-[0.14em] uppercase transition-all duration-200"
+            <button
+              type="button"
+              onClick={() => openRegisterInterest("education-events")}
+              className="inline-flex items-center gap-2 px-7 py-3.5 text-[11.5px] font-extrabold tracking-[0.14em] uppercase transition-all duration-200 cursor-pointer"
               style={{
                 backgroundColor: GOLD,
                 color: NAVY_900,
@@ -1623,7 +1626,7 @@ function EventsSection({ sectionRef }) {
             >
               Join Event Waitlist
               <ArrowUpRight size={12} />
-            </Link>
+            </button>
             <Link
               href="/insights"
               className="inline-flex items-center gap-2 px-7 py-3.5 text-[11.5px] font-bold tracking-[0.12em] uppercase border transition-all duration-200"

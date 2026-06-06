@@ -396,7 +396,7 @@ export default function SpvEditPage() {
         {/* ─── Company Info ─── */}
         <Section title="Company Details" icon={Briefcase}>
           <Field label="SPV Name" required error={fieldErrors.spvName}>
-            <input type="text" value={form.spvName} onChange={(e) => setField("spvName", e.target.value)} placeholder="e.g. Bricks & Wealth SPV 001 Ltd" style={inputStyle} />
+            <input type="text" value={form.spvName} onChange={(e) => setField("spvName", e.target.value)} placeholder="e.g. Brick & Wealth SPV 001 Ltd" style={inputStyle} />
           </Field>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Field label="Company Number" required error={fieldErrors.companyNumber}>

@@ -100,7 +100,7 @@ export async function POST(request) {
     });
 
     const response = successResponse({
-      message: "Account activated. Welcome to Bricks & Wealth.",
+      message: "Account activated. Welcome to Brick & Wealth.",
       redirectUrl: "/dashboard",
     });
 

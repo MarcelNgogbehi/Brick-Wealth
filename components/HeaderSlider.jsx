@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { motion, useScroll, useTransform, useInView } from "framer-motion";
+import { useRegisterInterest } from "@/components/RegisterInterestModal";
 import {
   ArrowUpRight,
   ArrowRight,
@@ -73,6 +74,7 @@ function Counter({ value, suffix = "", duration = 1.6 }) {
 export default function Hero() {
   const heroRef = useRef(null);
   const [loaded, setLoaded] = useState(false);
+  const { open: openRegisterInterest } = useRegisterInterest();
 
   const { scrollY } = useScroll();
   const bgY = useTransform(scrollY, [0, 600], ["0%", "15%"]);
@@ -92,7 +94,7 @@ export default function Hero() {
         backgroundColor: NAVY_950,
         minHeight: "100vh",
       }}
-      aria-label="Hero — Bricks & Wealth"
+      aria-label="Hero — Brick & Wealth"
     >
       {/* ══ BACKGROUND IMAGE WITH PARALLAX ══════════════════════════════ */}
       <motion.div
@@ -345,10 +347,8 @@ export default function Hero() {
             animate={loaded ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.8, delay: 0.85, ease: [0.16, 1, 0.3, 1] }}
           >
-            A private, FCA-aligned property co-investment platform for invited
-            individuals. Participate in carefully selected UK opportunities
-            through ring-fenced Special Purpose Vehicles — fully documented,
-            fully transparent, fully on your terms.
+            Private, FCA-aligned UK property co-investment through ring-fenced
+            SPVs — fully documented, fully transparent, fully on your terms.
           </motion.p>
 
           {/* CTAs — exactly two, per spec */}
@@ -358,9 +358,10 @@ export default function Hero() {
             animate={loaded ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.8, delay: 1.0, ease: [0.16, 1, 0.3, 1] }}
           >
-            {/* Primary — Register Interest */}
-            <Link
-              href="/register-interest"
+            {/* Primary — Register Interest (opens the global modal form) */}
+            <button
+              type="button"
+              onClick={() => openRegisterInterest("hero")}
               className="group inline-flex items-center gap-2.5 h-[60px] px-9 text-[11.5px] font-extrabold tracking-[0.16em] uppercase transition-all duration-300"
               style={{
                 fontFamily: SANS,
@@ -368,6 +369,7 @@ export default function Hero() {
                 color: NAVY_900,
                 borderRadius: "2px",
                 boxShadow: "0 16px 36px -12px rgba(201,162,74,0.65)",
+                cursor: "pointer",
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.backgroundColor = GOLD_LIGHT;
@@ -387,7 +389,7 @@ export default function Hero() {
                 size={15}
                 className="transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
               />
-            </Link>
+            </button>
 
             {/* Secondary — Browse Opportunities */}
             <Link
@@ -415,7 +417,7 @@ export default function Hero() {
                   "rgba(255,255,255,0.04)";
               }}
             >
-              Browse Opportunities
+              Browse Opportunities (Preview)
               <ArrowRight
                 size={15}
                 className="transition-transform duration-200 group-hover:translate-x-1"

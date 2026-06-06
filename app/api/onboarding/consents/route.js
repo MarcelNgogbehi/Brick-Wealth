@@ -112,7 +112,7 @@ export async function POST(request) {
     });
 
     return successResponse({
-      message: "Welcome to Bricks & Wealth",
+      message: "Welcome to Brick & Wealth",
       redirectUrl: "/dashboard",
     });
   } catch (err) {

@@ -1,7 +1,7 @@
 "use client";
 
 // app/dashboard/referrals/page.jsx — Referral Dashboard
-// Layout mirrors the "Subscription & Referrals" mockup, styled in Bricks & Wealth navy/gold/green.
+// Layout mirrors the "Subscription & Referrals" mockup, styled in Brick & Wealth navy/gold/green.
 // Recognition-only: no monetary payouts; tier system is based on referral count.
 
 import { useEffect, useState, useCallback } from "react";
@@ -134,9 +134,9 @@ export default function ReferralsPage() {
   function sendInvite(e) {
     e.preventDefault();
     if (!inviteEmail.trim() || !link) return;
-    const sub  = encodeURIComponent("You're invited to invest with Bricks & Wealth");
+    const sub  = encodeURIComponent("You're invited to invest with Brick & Wealth");
     const body = encodeURIComponent(
-      `Hi,\n\nI'd like to invite you to join Bricks & Wealth — fractional property investment.\n\nApply here:\n${link}\n\nBest regards`
+      `Hi,\n\nI'd like to invite you to join Brick & Wealth — fractional property investment.\n\nApply here:\n${link}\n\nBest regards`
     );
     window.location.href = `mailto:${inviteEmail.trim()}?subject=${sub}&body=${body}`;
     setInviteEmail("");
@@ -146,7 +146,7 @@ export default function ReferralsPage() {
   async function shareLink() {
     if (!link) return;
     if (navigator.share) {
-      try { await navigator.share({ title: "Bricks & Wealth", url: link }); } catch { /* cancelled */ }
+      try { await navigator.share({ title: "Brick & Wealth", url: link }); } catch { /* cancelled */ }
     } else {
       copyLink();
     }

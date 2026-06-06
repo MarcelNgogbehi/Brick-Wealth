@@ -142,7 +142,7 @@ function SidebarInner({ user, initials, pathname, onClose, isMobile, onLogout, s
             </div>
             <div>
               <p className="text-[15px] font-bold leading-tight tracking-[-0.01em]" style={{ color: "#fff" }}>
-                Bricks<span style={{ color: C.gold }}>&amp;</span>Wealth
+                Brick<span style={{ color: C.gold }}>&amp;</span>Wealth
               </p>
               <p className="text-[8.5px] font-bold tracking-[0.22em] uppercase mt-1" style={{ color: C.sbBrandSub }}>
                 Private Wealth Management

@@ -68,7 +68,7 @@ const PROCESS_STEPS = [
     icon: Mail,
     label: "Invitation",
     title: "We invite. You apply.",
-    body: "Bricks & Wealth is private. You join via direct invitation, an existing-investor referral, or by registering your interest and being approved from the waitlist after manual review.",
+    body: "Brick & Wealth is private. You join via direct invitation, an existing-investor referral, or by registering your interest and being approved from the waitlist after manual review.",
     duration: "Same day · 48 hours",
   },
   {
@@ -128,7 +128,7 @@ const SPV_CONCEPTS = [
   {
     icon: ShieldCheck,
     title: "Ring-fenced by design",
-    body: "If another SPV has problems, your investment is unaffected — they share no assets, no liabilities, no bank accounts. Bankruptcy-remote from each other and from Bricks & Wealth.",
+    body: "If another SPV has problems, your investment is unaffected — they share no assets, no liabilities, no bank accounts. Bankruptcy-remote from each other and from Brick & Wealth.",
   },
   {
     icon: FileCheck,
@@ -227,7 +227,7 @@ const EXIT_STRATEGIES = [
     title: "Resell shares",
     timeframe: "Anytime, secondary market",
     description:
-      "List your shares on our internal secondary market. Other approved investors can bid. Bricks & Wealth facilitates the transfer and updates the cap table — subject to liquidity and pricing.",
+      "List your shares on our internal secondary market. Other approved investors can bid. Brick & Wealth facilitates the transfer and updates the cap table — subject to liquidity and pricing.",
     bullets: [
       "List from your investor dashboard",
       "Buyer must be KYC-approved",
@@ -349,7 +349,7 @@ function PageHero() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.2 }}
             >
-              How Bricks &amp; Wealth{" "}
+              How Brick &amp; Wealth{" "}
               <em
                 style={{
                   color: GOLD_LIGHT,
@@ -1811,9 +1811,9 @@ export default function HowItWorksPage() {
           __html: JSON.stringify({
             "@context": "https://schema.org",
             "@type": "HowTo",
-            name: "How Bricks & Wealth Works",
+            name: "How Brick & Wealth Works",
             description:
-              "The complete operating manual: process, co-ownership, risk & returns, and exit strategies for Bricks & Wealth investors.",
+              "The complete operating manual: process, co-ownership, risk & returns, and exit strategies for Brick & Wealth investors.",
             step: PROCESS_STEPS.map((step, i) => ({
               "@type": "HowToStep",
               position: i + 1,

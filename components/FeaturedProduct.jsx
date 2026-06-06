@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState, useRef } from "react";
 import { motion, useInView } from "framer-motion";
+import { useAuthSession } from "@/lib/use-auth-session";
 import {
   ArrowUpRight,
   ArrowRight,
@@ -352,11 +353,24 @@ export const STRATEGIES = [
 // ═════════════════════════════════════════════════════════════════════════════
 // OPPORTUNITY CARD — reusable, no price, no "Invest Now"
 // ═════════════════════════════════════════════════════════════════════════════
+// Public opportunity cards route guests to the portal (login/register) and
+// authenticated investors/admins to their respective detail view.
+function useOpportunityHref() {
+  const { authenticated, isAdmin } = useAuthSession();
+  return (id) =>
+    !authenticated
+      ? "/portal"
+      : isAdmin
+      ? `/admin/opportunities/${id}`
+      : `/dashboard/opportunities/${id}`;
+}
+
 export function OpportunityCard({ spv, index = 0, variant = "default" }) {
   const [saved, setSaved] = useState(false);
   const [hovered, setHovered] = useState(false);
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-40px" });
+  const opportunityHref = useOpportunityHref();
 
   const isClosed = spv.status === "closed";
   const isUpcoming = spv.status === "upcoming";
@@ -371,7 +385,7 @@ export function OpportunityCard({ spv, index = 0, variant = "default" }) {
       className="h-full"
     >
       <Link
-        href={`/opportunities/${spv.id}`}
+        href={opportunityHref(spv.id)}
         className="flex flex-col h-full overflow-hidden"
         style={{
           backgroundColor: WHITE,
@@ -1071,6 +1085,7 @@ function FeaturedGrid() {
 // HERO CARD — large featured card for the lead opportunity
 // ═════════════════════════════════════════════════════════════════════════════
 function FeaturedHeroCard({ spv }) {
+  const opportunityHref = useOpportunityHref();
   const [hovered, setHovered] = useState(false);
   const [saved, setSaved] = useState(false);
   const ref = useRef(null);
@@ -1085,7 +1100,7 @@ function FeaturedHeroCard({ spv }) {
       className="h-full"
     >
       <Link
-        href={`/opportunities/${spv.id}`}
+        href={opportunityHref(spv.id)}
         className="relative h-full overflow-hidden block group"
         style={{
           backgroundColor: NAVY_900,

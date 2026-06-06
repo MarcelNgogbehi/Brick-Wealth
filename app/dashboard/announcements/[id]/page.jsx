@@ -197,7 +197,7 @@ export default function AnnouncementDetailPage() {
             className="text-[11px] font-semibold tracking-[0.1em] uppercase"
             style={{ color: C.muted }}
           >
-            Bricks &amp; Wealth Team
+            Brick &amp; Wealth Team
           </p>
           <button
             type="button"

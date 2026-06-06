@@ -325,7 +325,7 @@ function Statement({ statement, cs, filter, setFilter }) {
             not authorised to provide tax advice.
           </p>
           <p className="text-[11.5px] mt-3" style={{ color: C.faint }}>
-            Generated {new Date(statement.generatedAt).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })} · {statement.taxYear} · {statement.system === "CALENDAR" ? "Calendar year" : "UK Self Assessment"} · © {new Date().getFullYear()} Bricks &amp; Wealth Holdings Ltd.
+            Generated {new Date(statement.generatedAt).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })} · {statement.taxYear} · {statement.system === "CALENDAR" ? "Calendar year" : "UK Self Assessment"} · © {new Date().getFullYear()} Brick &amp; Wealth Holdings Ltd.
           </p>
         </div>
         <div className="rounded-2xl p-5 flex flex-col" style={{ backgroundColor: C.bg, border: `1px solid ${C.border}` }}>

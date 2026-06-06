@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useState, useRef, useEffect } from "react";
 import { motion, useInView, AnimatePresence } from "framer-motion";
@@ -36,6 +37,7 @@ import {
   Clock,
 } from "lucide-react";
 import { FaWhatsapp, FaXTwitter, FaLinkedinIn, FaInstagram } from "react-icons/fa6";
+import mr_marcel from "@/assets/Mr Marcel.jpg";
 
 // ─── Brand tokens ─────────────────────────────────────────────────────────────
 const NAVY_900 = "#0A1F44";
@@ -57,7 +59,7 @@ const GREEN = "#0F6E56";
 
 // ─── Section nav ─────────────────────────────────────────────────────────────
 const SECTIONS = [
-  { id: "about", label: "About Bricks & Wealth", Icon: Briefcase },
+  { id: "about", label: "About Brick & Wealth", Icon: Briefcase },
   { id: "compliance", label: "Compliance & FCA", Icon: ShieldCheck },
   { id: "contact", label: "Contact & Book a Call", Icon: MessageSquare },
 ];
@@ -97,7 +99,7 @@ const MILESTONES = [
   {
     year: "2025",
     label: "Foundation",
-    title: "Bricks & Wealth Holdings Ltd is incorporated",
+    title: "Brick & Wealth Holdings Ltd is incorporated",
     body: "Companies House registration. Legal counsel engaged. Compliance framework drafted to FCA-aligned standards. First investor advisory board convened.",
   },
   {
@@ -120,7 +122,7 @@ const COMPLIANCE_PILLARS = [
     icon: ShieldCheck,
     title: "FCA Framework",
     short: "Operating to UK regulatory standards",
-    body: "Bricks & Wealth operates under the Financial Conduct Authority's framework for sophisticated and high-net-worth investors. Every investor self-certifies before accessing live opportunities.",
+    body: "Brick & Wealth operates under the Financial Conduct Authority's framework for sophisticated and high-net-worth investors. Every investor self-certifies before accessing live opportunities.",
     documents: [
       "Investor self-certification process",
       "Promotional restrictions policy",
@@ -214,9 +216,9 @@ const CONTACT_METHODS = [
     icon: Calendar,
     title: "Book a Discovery Call",
     short: "30 minutes · No commitment",
-    body: "The fastest way to understand if Bricks & Wealth fits your investment goals. Speak directly with our investor team — no sales pressure, just a conversation.",
+    body: "The fastest way to understand if Brick & Wealth fits your investment goals. Speak directly with our investor team — no sales pressure, just a conversation.",
     cta: "Schedule a Call",
-    ctaHref: "/contact/book-call",
+    ctaHref: "/company/contact#contact-form",
     accent: GOLD,
   },
   {
@@ -289,7 +291,7 @@ function PageHero() {
         >
           VI
         </div>
-        {/* Stacked-bricks logomark */}
+        {/* Stacked-brick logomark */}
         <svg
           className="absolute -top-20 left-12 opacity-[0.06]"
           width="380"
@@ -332,7 +334,7 @@ function PageHero() {
                 className="text-[11px] font-bold tracking-[0.32em] uppercase"
                 style={{ color: GOLD_LIGHT }}
               >
-                Bricks &amp; Wealth Holdings Ltd
+                Brick &amp; Wealth Holdings Ltd
               </span>
             </motion.div>
 
@@ -641,10 +643,10 @@ function AboutSection({ sectionRef }) {
       <div className="relative max-w-[1300px] mx-auto px-5 sm:px-8 xl:px-10">
         <SectionHeader
           number="01"
-          eyebrow="About Bricks & Wealth"
+          eyebrow="About Brick & Wealth"
           title="The founder story"
           titleAccent="& vision."
-          description="Why Marcel started Bricks & Wealth, what we believe about UK property, and the four values that govern every decision we make on behalf of investors."
+          description="Why Marcel started Brick & Wealth, what we believe about UK property, and the four values that govern every decision we make on behalf of investors."
         />
 
         {/* Founder feature block */}
@@ -773,12 +775,14 @@ function FounderFeature() {
           background: `linear-gradient(135deg, ${NAVY_900}, ${NAVY_700})`,
         }}
       >
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src="https://images.unsplash.com/photo-1556157382-97eda2d62296?w=1200&q=85&auto=format&fit=crop"
-          alt="Marcel Ngogbehei, Founder of Bricks & Wealth"
-          className="w-full h-full object-cover"
+        <Image
+          src={mr_marcel}
+          alt="Marcel Ngogbehei, Founder of Brick & Wealth"
+          fill
+          className="object-cover"
           style={{ filter: "saturate(0.85)" }}
+          sizes="(max-width: 1024px) 100vw, 50vw"
+          priority
         />
         <div
           className="absolute inset-0"
@@ -903,26 +907,11 @@ function FounderFeature() {
           className="text-[13.5px] leading-[1.78] mb-6"
           style={{ color: INK_MID, fontWeight: 300 }}
         >
-          Bricks &amp; Wealth was built to bridge that gap — not by reinventing
+          Brick &amp; Wealth was built to bridge that gap — not by reinventing
           property investment, but by making the same structures used by
           institutions accessible to invited individuals, in plain English,
           with FCA-aligned compliance and full documentation at every step.
         </p>
-
-        <Link
-          href="/insights/founder-notes"
-          className="inline-flex items-center gap-2 text-[11.5px] font-extrabold tracking-[0.14em] uppercase transition-all duration-200 group"
-          style={{ color: INK, alignSelf: "flex-start" }}
-        >
-          <span style={{ borderBottom: `1.5px solid ${GOLD}`, paddingBottom: 2 }}>
-            Read Founder&apos;s Notes
-          </span>
-          <ArrowRight
-            size={13}
-            style={{ color: GOLD_DARK }}
-            className="transition-transform duration-200 group-hover:translate-x-1"
-          />
-        </Link>
       </div>
     </motion.div>
   );
@@ -1097,7 +1086,7 @@ function ComplianceSection({ sectionRef }) {
           eyebrow="Compliance & FCA"
           title="The regulatory"
           titleAccent="framework."
-          description="How Bricks & Wealth meets UK regulatory standards across six pillars — with the documentation you can request, inspect, and verify independently."
+          description="How Brick & Wealth meets UK regulatory standards across six pillars — with the documentation you can request, inspect, and verify independently."
           dark
         />
 
@@ -1141,7 +1130,7 @@ function ComplianceSection({ sectionRef }) {
                   color: WHITE,
                 }}
               >
-                Bricks &amp; Wealth Holdings Ltd
+                Brick &amp; Wealth Holdings Ltd
               </p>
               <p
                 className="text-[12px] mt-1"
@@ -1809,7 +1798,7 @@ function ContactSection({ sectionRef }) {
                 className="text-[13px] leading-relaxed not-italic mb-5"
                 style={{ color: "rgba(255,255,255,0.7)" }}
               >
-                Bricks &amp; Wealth Holdings Ltd
+                Brick &amp; Wealth Holdings Ltd
                 <br />
                 Registered Office
                 <br />
@@ -2097,7 +2086,7 @@ export default function CompanyPage() {
           __html: JSON.stringify({
             "@context": "https://schema.org",
             "@type": "Organization",
-            name: "Bricks & Wealth Holdings Ltd",
+            name: "Brick & Wealth Holdings Ltd",
             url: "https://brickandwealth.com",
             logo: "https://brickandwealth.com/logo.png",
             description:

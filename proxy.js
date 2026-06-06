@@ -92,6 +92,39 @@ export function proxy(request) {
     );
   }
 
+  // ─── LEGACY ADMIN COOKIE HEALING ───────────────────────────────────
+  // The admin_session cookie used to be scoped to `Path=/admin`. Such a cookie
+  // is sent to /admin/* pages (so the server layout renders the console) but is
+  // NOT sent to /api/admin/* route handlers — "/api/admin/…" is not a subpath of
+  // "/admin" — so every admin data fetch (investors, live stats, …) came back
+  // 401 and the UI showed "Couldn't load…". The cookie is now minted at `Path=/`
+  // (lib/auth.adminSessionCookieOptions), but admins who signed in before that
+  // change are stranded until their session expires. On any admin page
+  // navigation the legacy cookie IS present here, so re-anchor it at `Path=/`
+  // (and clear the stale /admin-scoped copy) before the page's own fetches run.
+  // The DB token (AuthToken.expiresAt) stays the source of truth for validity,
+  // so refreshing Max-Age here cannot extend a session past its real expiry.
+  //
+  // These run last, as raw header appends: the CSRF bootstrap above goes through
+  // response.cookies.set(), which re-serializes the Set-Cookie header from its
+  // own store — appending before it would silently drop these. Two distinct
+  // Set-Cookie values (same name, different paths) are also why we can't use the
+  // cookies API, which is keyed by name only.
+  const onAdminPage = pathname === "/admin" || pathname.startsWith("/admin/");
+  const adminSession = request.cookies.get("admin_session")?.value;
+  if (onAdminPage && adminSession) {
+    const secure = process.env.NODE_ENV === "production";
+    const flags = `SameSite=Lax; HttpOnly${secure ? "; Secure" : ""}`;
+    response.headers.append(
+      "Set-Cookie",
+      `admin_session=${encodeURIComponent(adminSession)}; Path=/; Max-Age=${4 * 60 * 60}; ${flags}`
+    );
+    response.headers.append(
+      "Set-Cookie",
+      `admin_session=; Path=/admin; Max-Age=0; ${flags}`
+    );
+  }
+
   return response;
 }
 

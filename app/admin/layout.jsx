@@ -8,7 +8,7 @@ import { getCurrentAdmin } from "@/lib/admin-auth";
 import AdminShell from "./_components/AdminShell";
 
 export const metadata = {
-  title: "Admin Console — Bricks & Wealth",
+  title: "Admin Console — Brick & Wealth",
   description: "Internal administration",
   robots: { index: false, follow: false },
 };

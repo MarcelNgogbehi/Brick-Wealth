@@ -411,7 +411,7 @@ export default function SubscriptionsPage() {
             <Link key={label} href="/dashboard/documents" className="text-[12px]" style={{ color: C.muted, textDecoration: "none" }}>{label}</Link>
           ))}
         </div>
-        <p className="text-[11.5px]" style={{ color: C.muted }}>© {new Date().getFullYear()} Bricks &amp; Wealth Holdings Ltd. All investment data is encrypted and secure.</p>
+        <p className="text-[11.5px]" style={{ color: C.muted }}>© {new Date().getFullYear()} Brick &amp; Wealth Holdings Ltd. All investment data is encrypted and secure.</p>
       </div>
     </div>
   );

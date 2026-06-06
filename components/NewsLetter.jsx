@@ -175,7 +175,7 @@ export default function NewsletterSection() {
             bottom: "-3%",
           }}
         >
-          Bricks &amp; Wealth
+          Brick &amp; Wealth
         </div>
 
         {/* Gold dot grid — top left */}
@@ -199,7 +199,7 @@ export default function NewsletterSection() {
           <rect width="220" height="220" fill="url(#nl-dots)" />
         </svg>
 
-        {/* Bricks logomark — bottom right faint */}
+        {/* Brick logomark — bottom right faint */}
         <svg
           className="absolute -bottom-32 -right-32 opacity-[0.04]"
           width="500"
@@ -425,7 +425,7 @@ export default function NewsletterSection() {
               animate={inView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.65, delay: 0.22, ease: [0.16, 1, 0.3, 1] }}
             >
-              Bricks &amp; Wealth is invitation-only. Tell us a little about
+              Brick &amp; Wealth is invitation-only. Tell us a little about
               yourself and we&apos;ll review your details, send you a
               welcome briefing, and notify you when the next opportunity that
               matches your strategy goes live.
@@ -498,7 +498,7 @@ export default function NewsletterSection() {
                   className="text-[12px] mt-1"
                   style={{ color: TEXT_MID }}
                 >
-                  Sophisticated investors trust Bricks &amp; Wealth Briefings
+                  Sophisticated investors trust Brick &amp; Wealth Briefings
                 </p>
               </div>
             </motion.div>

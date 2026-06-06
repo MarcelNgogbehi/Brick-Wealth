@@ -1,8 +1,8 @@
 import LegalShell from "../_components/LegalShell";
 
 export const metadata = {
-  title: "Cookie Policy · Bricks & Wealth",
-  description: "The cookies and similar technologies Bricks & Wealth uses, and how you can control them.",
+  title: "Cookie Policy · Brick & Wealth",
+  description: "The cookies and similar technologies Brick & Wealth uses, and how you can control them.",
 };
 
 const doc = {
@@ -13,7 +13,7 @@ const doc = {
   updated: "5 June 2026",
   contactEmail: "privacy@brickandwealth.com",
   summary:
-    "This policy explains what cookies and similar technologies Bricks & Wealth uses, what they do, and how you can control them. Cookies are small text files placed on your device that help our platform work, keep you signed in securely, and — with your consent — help us understand how the platform is used.",
+    "This policy explains what cookies and similar technologies Brick & Wealth uses, what they do, and how you can control them. Cookies are small text files placed on your device that help our platform work, keep you signed in securely, and — with your consent — help us understand how the platform is used.",
   keyPoints: [
     "Essential cookies keep you signed in and the platform secure.",
     "Essential cookies don't need consent; analytics cookies do.",

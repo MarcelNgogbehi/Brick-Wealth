@@ -10,7 +10,7 @@ import AdminNotificationBell from "./AdminNotificationBell";
 import {
   LayoutDashboard, Users, ShieldCheck, UserPlus,
   Building2, Briefcase, Sparkles, Megaphone, Wallet,
-  Menu, LogOut, ChevronDown, Search, X, TrendingDown, Banknote, GitBranch, Bell, Activity
+  Menu, LogOut, ChevronDown, Search, X, TrendingDown, Banknote, GitBranch, Bell, Activity, Inbox
 } from "lucide-react";
 
 const SIDEBAR_W = 256;
@@ -52,6 +52,7 @@ const NAV = [
       { href: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
       { href: "/admin/activity", label: "Activity", icon: Activity },
       { href: "/admin/registrations", label: "Registrations", icon: UserPlus, badge: "regs" },
+      { href: "/admin/leads", label: "Leads", icon: Inbox, badge: "leads" },
       { href: "/admin/investors", label: "Investors", icon: Users },
       { href: "/admin/notifications", label: "Notifications", icon: Bell, badge: "notif" },
       { href: "/admin/kyc-queue", label: "KYC Queue", icon: ShieldCheck, badge: "kyc" },
@@ -85,6 +86,7 @@ const SEARCH_TARGETS = [
   { label: "Dashboard",      href: "/admin",               icon: LayoutDashboard, keywords: ["dashboard", "home", "overview", "console", "metrics", "stats"] },
   { label: "Activity",       href: "/admin/activity",      icon: Activity,        keywords: ["activity", "activities", "feed", "recent", "audit", "stream", "events", "timeline", "investor activity"] },
   { label: "Registrations",  href: "/admin/registrations", icon: UserPlus,        keywords: ["registrations", "applicants", "onboarding", "approve", "new", "signups"] },
+  { label: "Leads",          href: "/admin/leads",         icon: Inbox,           keywords: ["leads", "register interest", "interest", "prospects", "enquiries", "enquiry", "request invitation", "waitlist", "marketing"] },
   { label: "Investors",      href: "/admin/investors",     icon: Users,           keywords: ["investors", "users", "accounts", "clients", "members"] },
   { label: "Notifications",  href: "/admin/notifications", icon: Bell,            keywords: ["notifications", "messages", "inbox", "assistance", "support", "replies", "investor messages", "alerts"] },
   { label: "KYC Queue",      href: "/admin/kyc-queue",     icon: ShieldCheck,     keywords: ["kyc", "compliance", "identity", "verification", "documents", "review"] },
@@ -240,6 +242,7 @@ export default function AdminShell({ admin, children }) {
   const [profileOpen, setProfileOpen] = useState(false);
   const [kycCount, setKycCount] = useState(0);
   const [regCount, setRegCount] = useState(0);
+  const [leadsCount, setLeadsCount] = useState(0);
   const [notifCount, setNotifCount] = useState(0);
 
   useInactivityTimeout({ logoutUrl: "/api/admin/auth/logout", redirectUrl: "/portal" });
@@ -253,6 +256,7 @@ export default function AdminShell({ admin, children }) {
           if (dead || !d) return;
           setKycCount(d.stats?.pendingKyc ?? 0);
           setRegCount(d.stats?.pendingRegistrations ?? 0);
+          setLeadsCount(d.stats?.newLeads ?? 0);
         })
         .catch(() => {});
     };
@@ -300,6 +304,7 @@ export default function AdminShell({ admin, children }) {
     if (pathname === "/admin")                          return { title: "Dashboard",      subtitle: "Operational overview & key metrics",  search: "Search the console…" };
     if (pathname.startsWith("/admin/activity"))         return { title: "Investor Activity", subtitle: "Live feed of investor actions",    search: "Search activity…" };
     if (pathname.startsWith("/admin/registrations"))    return { title: "Registrations",  subtitle: "Approve and onboard new applicants",  search: "Search registrations…" };
+    if (pathname.startsWith("/admin/leads"))            return { title: "Leads",          subtitle: "Register-interest submissions to triage", search: "Search leads…" };
     if (pathname.startsWith("/admin/investors"))        return { title: "Investors",      subtitle: "Manage investor accounts",            search: "Search investors…" };
     if (pathname.startsWith("/admin/notifications"))    return { title: "Notifications",  subtitle: "Investor messages & account activity", search: "Search notifications…" };
     if (pathname.startsWith("/admin/kyc-queue"))        return { title: "KYC Queue",      subtitle: "Review identity & compliance docs",   search: "Search KYC submissions…" };
@@ -329,7 +334,7 @@ export default function AdminShell({ admin, children }) {
           </div>
           <div>
             <div className="text-[15px] font-bold leading-tight tracking-[-0.01em]" style={{ color: "#fff" }}>
-              Bricks<span style={{ color: C.gold }}>&amp;</span>Wealth
+              Brick<span style={{ color: C.gold }}>&amp;</span>Wealth
             </div>
             <div className="text-[8.5px] font-bold tracking-[0.22em] uppercase mt-1" style={{ color: C.sbBrandSub }}>
               Admin Console
@@ -355,7 +360,7 @@ export default function AdminShell({ admin, children }) {
               {section.items.map((item) => {
                 const Icon = item.icon;
                 const isActive = active(item);
-                const badge = item.badge === "kyc" ? kycCount : item.badge === "regs" ? regCount : item.badge === "notif" ? notifCount : 0;
+                const badge = item.badge === "kyc" ? kycCount : item.badge === "regs" ? regCount : item.badge === "leads" ? leadsCount : item.badge === "notif" ? notifCount : 0;
                 return (
                   <li key={item.href}>
                     <Link href={item.href}
