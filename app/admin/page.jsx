@@ -518,7 +518,13 @@ export default function AdminDashboard() {
   useEffect(() => {
     let dead = false;
     fetch("/api/admin/stats", { credentials: "same-origin" })
-      .then((r) => { if (!r.ok) throw new Error("Failed"); return r.json(); })
+      .then(async (r) => {
+        if (!r.ok) {
+          const detail = await r.json().catch(() => null);
+          throw new Error(detail?.message || `Request failed (${r.status})`);
+        }
+        return r.json();
+      })
       .then((d) => { if (!dead) { setStats(d.stats); setInsights(d.insights || null); setSyncedAt(new Date()); setLoading(false); } })
       .catch((e) => { if (!dead) { setError(e.message); setLoading(false); } });
     return () => { dead = true; };
